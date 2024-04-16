@@ -1,0 +1,2 @@
+# MLEBot
+ MLE Discord Bot
