@@ -22,8 +22,6 @@ import dotenv
 # python native imports
 import os
 
-dotenv.load_dotenv()
-
 
 class MLEBot(bot.Bot):
     def __init__(self,

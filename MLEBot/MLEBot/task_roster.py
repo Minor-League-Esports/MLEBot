@@ -6,17 +6,17 @@
 import channels
 import datetime
 import discord
-import dotenv
 from discord.ext import commands
+import dotenv
 import member
 import os
 import pickle
 import roles
 from typing import Callable
-
 from err import err
 
-dotenv.load_dotenv()
+dotenv.load_dotenv('.env')
+
 try:
     IMG_STAFF = os.getenv('IMG_STAFF')
 except KeyError:

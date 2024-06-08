@@ -30,7 +30,8 @@ class MLECommands(commands.Cog):
         if not member.has_role(ctx.author,
                                roles.GENERAL_MGMT_ROLES):
             return await self.bot.send_notification(ctx, ERR_NO_PERMS, True)
-        await err(self.bot.franchise.build(self.bot.guild.members))
+        sts = await self.bot.franchise.rebuild()
+        await err(sts)
 
     @commands.command(name='clearchannel', description='clear channel messages')
     async def clearchannel(self, ctx: discord.ext.commands.Context, count: int):

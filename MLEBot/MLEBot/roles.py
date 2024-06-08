@@ -4,8 +4,11 @@
 """
 import copy
 import discord
+import dotenv
+
 import enums
 import member
+import os
 
 """ Constants
 """
@@ -43,17 +46,18 @@ Waivers = "Waivers"
 Wizards = "Wizards"
 Wolves = "Wolves"
 SOCIAL_MEDIA = 'Social Media'
-FRANCHISE_MANAGER = 'Franchise Manager'
-GENERAL_MANAGER_RL = 'GM Rocket League'
-GENERAL_MANAGER_TM = 'GM Trackmania'
-ASSISTANT_GENERAL_MANAGER_RL = 'AGM Rocket League'
-ASSISTANT_GENERAL_MANAGER_TM = 'AGM Trackmania'
-CAPTAIN = 'Captain Rocket League'
-PREMIER_LEAGUE = 'Premier League'
-MASTER_LEAGUE = 'Master League'
-CHAMPION_LEAGUE = 'Champion League'
-ACADEMY_LEAGUE = 'Academy League'
-FOUNDATION_LEAGUE = 'Foundation League'
+dotenv.load_dotenv('.env')
+FRANCHISE_MANAGER = os.getenv('ROLE_FM')
+GENERAL_MANAGER_RL = os.getenv('ROLE_GM_RL')
+GENERAL_MANAGER_TM = os.getenv('ROLE_GM_TM')
+ASSISTANT_GENERAL_MANAGER_RL = os.getenv('ROLE_AGM_RL')
+ASSISTANT_GENERAL_MANAGER_TM = os.getenv('ROLE_AGM_TM')
+CAPTAIN = os.getenv('ROLE_CAPTAIN_RL')
+PREMIER_LEAGUE = os.getenv('ROLE_PL')
+MASTER_LEAGUE = os.getenv('ROLE_ML')
+CHAMPION_LEAGUE = os.getenv('ROLE_CL')
+ACADEMY_LEAGUE = os.getenv('ROLE_AL')
+FOUNDATION_LEAGUE = os.getenv('ROLE_FL')
 ROCKET_LEAGUE = 'Rocket League'
 PR_SUPPORT = 'PR Support'
 FA = 'Free Agent'

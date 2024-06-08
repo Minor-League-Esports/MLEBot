@@ -8,7 +8,7 @@ import channels
 import discord
 from discord.ext import commands
 from err import err
-# from html2image import Html2Image
+from html2image import Html2Image
 import member
 import enums
 
@@ -360,8 +360,7 @@ class Team:
                                                                                away_team_wk_13_logo=wk['13'][
                                                                                    'away_url'],
                                                                                score_wk_13=wk['13']['score'],
-                                                                               team_img=self.__get_emote_by_id__(
-                                                                                   EMOTE_SABRES_NO_BG_ID).url)
+                                                                               team_img=self.franchise.bot.get_emoji(self.franchise.bot.server_icon).url)
 
         hti.screenshot(html_str=html_string, css_file=r'team/html/TeamWeeklyStats.css',
                        save_as=f'{get_league_text(self.league)}weeklystats_{game_mode}.png')
