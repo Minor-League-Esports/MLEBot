@@ -3,10 +3,10 @@
 # Purpose: General Functions and Commands
 # Version 3.00.01
 """
-from PyDiscoBot import channels
+import channels
 import discord
 from discord.ext import commands
-from PyDiscoBot import err
+import err
 import member
 import roles
 import team

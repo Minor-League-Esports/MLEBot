@@ -4,11 +4,13 @@
 # Version 3.00.01
 """
 import os
-from PyDiscoBot import channels
+import channels
+# from PyDiscoBot import channels
 import discord
 from discord.ext import commands
-from PyDiscoBot import err
-from html2image import Html2Image
+# from PyDiscoBot import err
+import err
+# from html2image import Html2Image
 import member
 import enums
 

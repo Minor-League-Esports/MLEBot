@@ -4,7 +4,7 @@
 """
 import datetime
 import discord
-from PyDiscoBot import err
+import err
 import pickle
 from sprocket_data_link import SprocketDataLink
 

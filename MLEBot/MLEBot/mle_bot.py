@@ -13,8 +13,8 @@ import task_sprocket
 
 # external imports
 import bot
-from PyDiscoBot import channels
-from PyDiscoBot import commands
+import channels
+import commands
 import discord
 from discord.ext import commands as disco_commands
 import dotenv

@@ -3,7 +3,7 @@
 # Purpose: Manage roles of a franchise and roster channel information
 # Version 3.00.01
 """
-from PyDiscoBot import channels
+import channels
 import datetime
 import discord
 import dotenv
@@ -14,7 +14,7 @@ import pickle
 import roles
 from typing import Callable
 
-from PyDiscoBot import err
+import err
 
 dotenv.load_dotenv()
 try:

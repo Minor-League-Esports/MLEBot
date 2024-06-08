@@ -6,8 +6,6 @@ import asyncio
 import datetime
 import requests
 
-from PyDiscoBot import err
-
 
 class SprocketDataLink:
     def __init__(self, url_link: str):
