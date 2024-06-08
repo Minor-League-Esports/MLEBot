@@ -14,7 +14,7 @@ import pickle
 import roles
 from typing import Callable
 
-import err
+from err import err
 
 dotenv.load_dotenv()
 try:

@@ -5,11 +5,9 @@
 """
 import os
 import channels
-# from PyDiscoBot import channels
 import discord
 from discord.ext import commands
-# from PyDiscoBot import err
-import err
+from err import err
 # from html2image import Html2Image
 import member
 import enums

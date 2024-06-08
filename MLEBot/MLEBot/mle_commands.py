@@ -6,7 +6,7 @@
 import channels
 import discord
 from discord.ext import commands
-import err
+from err import err
 import member
 import roles
 import team

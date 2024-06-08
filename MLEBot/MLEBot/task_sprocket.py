@@ -4,7 +4,7 @@
 """
 import datetime
 import discord
-import err
+from err import err
 import pickle
 from sprocket_data_link import SprocketDataLink
 
