@@ -1,0 +1,44 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "MLEBot"
+version = "1.0.1"
+authors = [
+  { name="Brian LaFond", email="Brian.L.LaFond@gmail.com" },
+]
+description = "Minor League E-Sports Franchise Utility bot base-code."
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+  # How mature is this project? Common values are
+  #   3 - Alpha
+  #   4 - Beta
+  #   5 - Production/Stable
+  "Development Status :: 4 - Beta",
+
+  # Indicate who your project is intended for
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Build Tools",
+
+  # Pick your license as you wish (see also "license" above)
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+
+  # Specify the Python versions you support here.
+  "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+    "PyDiscoBot",
+    "discord.py",
+    "python-dotenv",
+    "requests",
+    "html2image"
+]
+
+license = {file = "LICENSE"}
+keywords = ["python", "discord", "bot", "api", "minor league", "MLE"]
+
+[project.urls]
+Homepage = "https://github.com/iroxusux/MLEBot"
+Issues = "https://github.com/iroxusux/MLEBot/issues"
