@@ -5,6 +5,7 @@
 import discord
 from discord.ext import commands
 from enums import LeagueEnum
+import roles
 from typing import Self
 EMOTE_CHECK_GREEN = ':white_check_mark:'
 EMOTE_X_RED = ':x:'
@@ -59,15 +60,15 @@ class Member:
 
         for role in member.roles:
             match role.name:
-                case 'Premier League':
+                case roles.PREMIER_LEAGUE:
                     return LeagueEnum.Premier_League
-                case 'Master League':
+                case roles.MASTER_LEAGUE:
                     return LeagueEnum.Master_League
-                case 'Champion League':
+                case roles.CHAMPION_LEAGUE:
                     return LeagueEnum.Champion_League
-                case 'Academy League':
+                case roles.ACADEMY_LEAGUE:
                     return LeagueEnum.Academy_League
-                case 'Foundation League':
+                case roles.FOUNDATION_LEAGUE:
                     return LeagueEnum.Foundation_League
 
     async def __update_from_sprocket_players__(self,
