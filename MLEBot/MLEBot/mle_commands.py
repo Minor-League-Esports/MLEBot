@@ -1,15 +1,20 @@
+#!/usr/bin/env python
 """ Minor League E-Sports Bot Commands
 # Author: irox_rl
 # Purpose: General Functions and Commands
-# Version 3.00.01
+# Version 1.0.2
 """
-import channels
+
+from PyDiscoBot.PyDiscoBot import channels, err
+
+# local imports #
+from .member import Member, has_role
+from .roles import GENERAL_MGMT_ROLES, CAPTAIN_ROLES
+from .team import get_league_text
+
+# non-local imports #
 import discord
 from discord.ext import commands
-from err import err
-import member
-import roles
-import team
 
 """ System Error Strings 
 """
@@ -27,16 +32,16 @@ class MLECommands(commands.Cog):
         if ctx.channel is not discord.DMChannel:
             if self.bot.admin_commands_channel is None or ctx.channel is not self.bot.admin_commands_channel:
                 return
-        if not member.has_role(ctx.author,
-                               roles.GENERAL_MGMT_ROLES):
+        if not has_role(ctx.author,
+                        GENERAL_MGMT_ROLES):
             return await self.bot.send_notification(ctx, ERR_NO_PERMS, True)
         sts = await self.bot.franchise.rebuild()
         await err(sts)
 
     @commands.command(name='clearchannel', description='clear channel messages')
     async def clearchannel(self, ctx: discord.ext.commands.Context, count: int):
-        if not member.has_role(ctx.author,
-                               roles.GENERAL_MGMT_ROLES):
+        if not has_role(ctx.author,
+                        GENERAL_MGMT_ROLES):
             return await self.bot.send_notification(ctx, ERR_NO_PERMS, True)
         await channels.clear_channel_messages(ctx.channel, count)
 
@@ -47,8 +52,8 @@ class MLECommands(commands.Cog):
         if ctx.channel is not discord.DMChannel:
             if self.bot.admin_commands_channel is None or ctx.channel is not self.bot.admin_commands_channel:
                 return
-        if not member.has_role(ctx.author,
-                               roles.CAPTAIN_ROLES):
+        if not has_role(ctx.author,
+                        CAPTAIN_ROLES):
             return await self.bot.send_notification(ctx, ERR_NO_PERMS, True)
         mle_player = next((x for x in self.bot.sprocket.data['stonks'] if x['Player Name'] == ' '.join(mle_name)), None)
         if not mle_player:
@@ -86,8 +91,8 @@ class MLECommands(commands.Cog):
         if ctx.channel is not discord.DMChannel:
             if self.bot.admin_commands_channel is None or ctx.channel is not self.bot.admin_commands_channel:
                 return
-        if not member.has_role(ctx.author,
-                               roles.GENERAL_MGMT_ROLES):
+        if not has_role(ctx.author,
+                        GENERAL_MGMT_ROLES):
             return await self.bot.send_notification(ctx, ERR_NO_PERMS, True)
         if await self.bot.roster.post_roster():
             await err('Roster posted successfully!')
@@ -112,7 +117,7 @@ class MLECommands(commands.Cog):
                     return
         for _team in self.bot.franchise.teams:
             await self.desc_builder(ctx,
-                                    team.get_league_text(_team.league),
+                                    get_league_text(_team.league),
                                     _team.players)
 
     @commands.command(name='updatesprocket',
@@ -121,8 +126,8 @@ class MLECommands(commands.Cog):
         if ctx.channel is not discord.DMChannel:
             if self.bot.admin_commands_channel is None or ctx.channel is not self.bot.admin_commands_channel:
                 return
-        if not member.has_role(ctx.author,
-                               roles.GENERAL_MGMT_ROLES):
+        if not has_role(ctx.author,
+                        GENERAL_MGMT_ROLES):
             return await self.bot.send_notification(ctx, ERR_NO_PERMS, True)
         self.bot.sprocket.reset()
         await self.bot.sprocket.run()
@@ -131,14 +136,15 @@ class MLECommands(commands.Cog):
     async def desc_builder(self,
                            ctx: discord.ext.commands.Context,
                            title: str,
-                           players: [member.Member]):
+                           players: [Member]):
         for _p in players:
             await _p.__build_from_sprocket__(self.bot.sprocket.data)
         embed: discord.Embed = self.bot.default_embed(title, '')
         embed.add_field(name='name                                 sal       id',
                         value='\n'.join(
-                            [f'` {_p.mle_name.ljust(16) if _p.mle_name else "N/A?".ljust(16)} {str(_p.salary).ljust(4) if _p.salary else "N/A?"} {str(_p.mle_id).ljust(4) if _p.mle_id else "N/A??   "} `'
-                             for _p in players]),
+                            [
+                                f'` {_p.mle_name.ljust(16) if _p.mle_name else "N/A?".ljust(16)} {str(_p.salary).ljust(4) if _p.salary else "N/A?"} {str(_p.mle_id).ljust(4) if _p.mle_id else "N/A??   "} `'
+                                for _p in players]),
                         inline=False)
         if self.bot.server_icon:
             embed.set_thumbnail(url=self.bot.get_emoji(self.bot.server_icon).url)

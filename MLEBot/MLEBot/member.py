@@ -1,12 +1,20 @@
+#!/usr/bin/env python
 """ Minor League E-Sports Member
 # Author: irox_rl
 # Purpose: General Functions of a League Member
+# Version 1.0.2
 """
+
+# local imports #
+from .enums import LeagueEnum
+from .roles import PREMIER_LEAGUE, MASTER_LEAGUE, CHAMPION_LEAGUE, ACADEMY_LEAGUE, FOUNDATION_LEAGUE
+
+# non-local imports #
 import discord
 from discord.ext import commands
-from enums import LeagueEnum
-import roles
 from typing import Self
+
+# constants
 EMOTE_CHECK_GREEN = ':white_check_mark:'
 EMOTE_X_RED = ':x:'
 
@@ -57,19 +65,17 @@ class Member:
     def __get_league_role__(member: discord.Member) -> LeagueEnum | None:
         """ Returns league enumeration if user has associated role
             else returns None """
-
         for role in member.roles:
-            match role.name:
-                case roles.PREMIER_LEAGUE:
-                    return LeagueEnum.Premier_League
-                case roles.MASTER_LEAGUE:
-                    return LeagueEnum.Master_League
-                case roles.CHAMPION_LEAGUE:
-                    return LeagueEnum.Champion_League
-                case roles.ACADEMY_LEAGUE:
-                    return LeagueEnum.Academy_League
-                case roles.FOUNDATION_LEAGUE:
-                    return LeagueEnum.Foundation_League
+            if role.name == PREMIER_LEAGUE:
+                return LeagueEnum.Premier_League
+            if role.name == MASTER_LEAGUE:
+                return LeagueEnum.Master_League
+            if role.name == CHAMPION_LEAGUE:
+                return LeagueEnum.Champion_League
+            if role.name == ACADEMY_LEAGUE:
+                return LeagueEnum.Academy_League
+            if role.name == FOUNDATION_LEAGUE:
+                return LeagueEnum.Foundation_League
 
     async def __update_from_sprocket_players__(self,
                                                sprocket_players: {}) -> None:

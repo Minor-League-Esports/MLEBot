@@ -1,7 +1,13 @@
+#!/usr/bin/env python
 """ Minor League E-Sports Enumerations
 # Author: irox_rl
 # Purpose: Host MLE related enumerations to be used throughout this project
+# Version 1.0.2
 """
+
+# local imports #
+
+# non-local imports #
 from enum import Enum
 
 

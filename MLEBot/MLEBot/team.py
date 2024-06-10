@@ -1,16 +1,22 @@
+#!/usr/bin/env python
 """ Minor League E-Sports Team
 # Author: irox_rl
 # Purpose: General Functions of a League Team
-# Version 3.00.01
+# Version 1.0.2
 """
+
+from PyDiscoBot.PyDiscoBot import channels, err
+
+# local imports #
+from .member import Member
+from .enums import LeagueEnum
+
+# non-local imports #
 import os
-import channels
 import discord
 from discord.ext import commands
-from err import err
 from html2image import Html2Image
-import member
-import enums
+
 
 MLE_SEASON = 'Season 17'
 EMOTE_CHECK_GREEN = ':white_check_mark:'
@@ -134,14 +140,14 @@ class Team:
                         """
         """ Parse all possible players based on role as defined by MLE
         """
-        playerA: member.Member | None = next((x for x in self.players if x.role == 'PLAYERA'), None)
-        playerB: member.Member | None = next((x for x in self.players if x.role == 'PLAYERB'), None)
-        playerC: member.Member | None = next((x for x in self.players if x.role == 'PLAYERC'), None)
-        playerD: member.Member | None = next((x for x in self.players if x.role == 'PLAYERD'), None)
-        playerE: member.Member | None = next((x for x in self.players if x.role == 'PLAYERE'), None)
-        playerF: member.Member | None = next((x for x in self.players if x.role == 'PLAYERF'), None)
-        playerG: member.Member | None = next((x for x in self.players if x.role == 'PLAYERG'), None)
-        playerH: member.Member | None = next((x for x in self.players if x.role == 'PLAYERH'), None)
+        playerA: Member | None = next((x for x in self.players if x.role == 'PLAYERA'), None)
+        playerB: Member | None = next((x for x in self.players if x.role == 'PLAYERB'), None)
+        playerC: Member | None = next((x for x in self.players if x.role == 'PLAYERC'), None)
+        playerD: Member | None = next((x for x in self.players if x.role == 'PLAYERD'), None)
+        playerE: Member | None = next((x for x in self.players if x.role == 'PLAYERE'), None)
+        playerF: Member | None = next((x for x in self.players if x.role == 'PLAYERF'), None)
+        playerG: Member | None = next((x for x in self.players if x.role == 'PLAYERG'), None)
+        playerH: Member | None = next((x for x in self.players if x.role == 'PLAYERH'), None)
         playerA_name = next((x.mle_name for x in self.players if x.role == 'PLAYERA'), '')
         playerB_name = next((x.mle_name for x in self.players if x.role == 'PLAYERB'), '')
         playerC_name = next((x.mle_name for x in self.players if x.role == 'PLAYERC'), '')
@@ -474,7 +480,7 @@ class Team:
                                  as_standard=False)
 
     def add_member(self,
-                   new_member: member.Member) -> bool:
+                   new_member: Member) -> bool:
         """ Add a MLE member to this team's roster\n
                         **param member**: MLE Member to be added to this roster\n
                         **returns** Success status of add\n
@@ -543,7 +549,7 @@ class Team:
         self.guild = guild
         self.channel = channel
         for data in pickle_data['sprocket_players']:
-            self.add_member(member.Member.from_pickle(self.guild,
+            self.add_member(Member.from_pickle(self.guild,
                                                       data))
         if pickle_data['message_id']:
             self.message_id = pickle_data['message_id']
@@ -596,7 +602,7 @@ class Team:
                                (x['winning_team'] != "Not Played / Data Unavailable")]
         return self.played_matches
 
-    def remove_member(self, _member: member.Member) -> bool:
+    def remove_member(self, _member: Member) -> bool:
         if _member in self.players:
             self.players.remove(_member)
             return True
@@ -624,38 +630,19 @@ class Team:
         """
         await self.build_quick_info_channel(self.sprocket_data)
 
-
-def get_league_role(_member: discord.Member) -> enums.LeagueEnum | None:
-    """ Returns league enumeration if user has associated role
-        else returns None """
-
-    for role in _member.roles:
-        match role.name:
-            case 'Premier League':
-                return enums.LeagueEnum.Premier_League
-            case 'Master League':
-                return enums.LeagueEnum.Master_League
-            case 'Champion League':
-                return enums.LeagueEnum.Champion_League
-            case 'Academy League':
-                return enums.LeagueEnum.Academy_League
-            case 'Foundation League':
-                return enums.LeagueEnum.Foundation_League
-
-
-def get_league_text(league: enums.LeagueEnum) -> str | None:
+def get_league_text(league: LeagueEnum) -> str | None:
     """ Get text representation of League enumeration """
 
     match league:
-        case enums.LeagueEnum.Premier_League:
+        case LeagueEnum.Premier_League:
             return "Premier League"
-        case enums.LeagueEnum.Master_League:
+        case LeagueEnum.Master_League:
             return "Master League"
-        case enums.LeagueEnum.Champion_League:
+        case LeagueEnum.Champion_League:
             return "Champion League"
-        case enums.LeagueEnum.Academy_League:
+        case LeagueEnum.Academy_League:
             return "Academy League"
-        case enums.LeagueEnum.Foundation_League:
+        case LeagueEnum.Foundation_League:
             return "Foundation League"
 
 
@@ -663,13 +650,13 @@ def get_league_text_short(league) -> str | None:
     """ Get shorthand string representation of League enumeration """
 
     match league:
-        case enums.LeagueEnum.Premier_League:
+        case LeagueEnum.Premier_League:
             return "PL"
-        case enums.LeagueEnum.Master_League:
+        case LeagueEnum.Master_League:
             return "ML"
-        case enums.LeagueEnum.Champion_League:
+        case LeagueEnum.Champion_League:
             return "CL"
-        case enums.LeagueEnum.Academy_League:
+        case LeagueEnum.Academy_League:
             return "AL"
-        case enums.LeagueEnum.Foundation_League:
+        case LeagueEnum.Foundation_League:
             return "FL"

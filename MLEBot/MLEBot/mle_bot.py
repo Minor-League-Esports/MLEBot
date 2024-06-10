@@ -1,29 +1,27 @@
+#!/usr/bin/env python
 """ Minor League E-Sports Bot
 # Author: irox_rl
 # Purpose: General Functions of a League Franchise summarized in bot fashion!
-# Version 3.00.01
+# Version 1.0.2
 """
 
-# MLEBot imports
-import franchise
-import mle_commands
-import roles
-import task_roster
-import task_sprocket
+from PyDiscoBot.PyDiscoBot import Bot, channels, commands
 
-# external imports
-import bot
-import channels
-import commands
+# local imports #
+from .franchise import Franchise
+from .mle_commands import MLECommands
+from .roles import init
+from .task_roster import Task_Roster
+from .task_sprocket import Task_Sprocket
+
+# non-local imports #
 import discord
 from discord.ext import commands as disco_commands
 import dotenv
-
-# python native imports
 import os
 
 
-class MLEBot(bot.Bot):
+class MLEBot(Bot):
     def __init__(self,
                  command_prefix: str | None,
                  bot_intents: discord.Intents | None,
@@ -37,12 +35,13 @@ class MLEBot(bot.Bot):
         self._champion_channel: discord.TextChannel | None = None
         self._academy_channel: discord.TextChannel | None = None
         self._foundation_channel: discord.TextChannel | None = None
-        self._sprocket = task_sprocket.Task_Sprocket(self)
-        self._roster = task_roster.Task_Roster(self)
-        self._franchise = franchise.Franchise(self,
-                                              self._guild,
-                                              disable_premier_league=True if (os.getenv('PREMIER_CHANNEL') == '') else False,
-                                              disable_foundation_league=True if (os.getenv('FOUNDATION_CHANNEL') == '') else False)
+        self._sprocket = Task_Sprocket(self)
+        self._roster = Task_Roster(self)
+        self._franchise = Franchise(self,
+                                    self._guild,
+                                    disable_premier_league=True if (os.getenv('PREMIER_CHANNEL') == '') else False,
+                                    disable_foundation_league=True if (
+                                                os.getenv('FOUNDATION_CHANNEL') == '') else False)
 
     @property
     def academy_channel(self) -> discord.TextChannel | None:
@@ -63,7 +62,7 @@ class MLEBot(bot.Bot):
         return self._foundation_channel
 
     @property
-    def franchise(self) -> franchise.Franchise:
+    def franchise(self) -> Franchise:
         return self._franchise
 
     @property
@@ -79,7 +78,7 @@ class MLEBot(bot.Bot):
         return self._premier_channel
 
     @property
-    def roster(self) -> task_roster.Task_Roster:
+    def roster(self) -> Task_Roster:
         return self._roster
 
     @property
@@ -89,7 +88,7 @@ class MLEBot(bot.Bot):
         return self._roster_channel
 
     @property
-    def sprocket(self) -> task_sprocket.Task_Sprocket | None:
+    def sprocket(self) -> Task_Sprocket | None:
         return self._sprocket
 
     async def on_ready(self,
@@ -103,7 +102,7 @@ class MLEBot(bot.Bot):
         if self._initialized:
             return
         await super().on_ready(suppress_task)
-        roles.init(self._guild)
+        init(self._guild)
 
         try:
             roster_channel_token: str | None = os.getenv('ROSTER_CHANNEL')
@@ -171,6 +170,6 @@ if __name__ == '__main__':
 
     bot = MLEBot('ub.',
                  intents,
-                 [commands.Commands, mle_commands.MLECommands])
+                 [commands.Commands, MLECommands])
 
     bot.run(os.getenv('DISCORD_TOKEN'))

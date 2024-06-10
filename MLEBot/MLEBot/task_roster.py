@@ -1,19 +1,24 @@
+#!/usr/bin/env python
 """ Periodic Task - Role
 # Author: irox_rl
 # Purpose: Manage roles of a franchise and roster channel information
-# Version 3.00.01
+# Version 1.0.2
 """
-import channels
+
+from PyDiscoBot.PyDiscoBot import channels, err
+
+# local imports #
+from .member import get_members_by_role
+from .roles import *
+
+# non-local imports #
 import datetime
 import discord
 from discord.ext import commands
 import dotenv
-import member
 import os
 import pickle
-import roles
 from typing import Callable
-from err import err
 
 dotenv.load_dotenv('.env')
 
@@ -89,32 +94,32 @@ class Task_Roster:
             if not await self.__role_update_helper__(self.premier_msg,
                                                      self.__get_league__,
                                                      'Premier',
-                                                     roles.premier):
+                                                     premier):
                 return
 
         if not await self.__role_update_helper__(self.master_msg,
                                                  self.__get_league__,
                                                  'Master',
-                                                 roles.master):
+                                                 master):
             return
 
         if not await self.__role_update_helper__(self.champion_msg,
                                                  self.__get_league__,
                                                  'Champion',
-                                                 roles.champion):
+                                                 champion):
             return
 
         if not await self.__role_update_helper__(self.academy_msg,
                                                  self.__get_league__,
                                                  'Academy',
-                                                 roles.academy):
+                                                 academy):
             return
 
         if not self.bot.franchise.foundation_disabled:
             if not await self.__role_update_helper__(self.foundation_msg,
                                                      self.__get_league__,
                                                      'Foundation',
-                                                     roles.foundation):
+                                                     foundation):
                 return
         await err('Roster has been successfully updated!')
 
@@ -143,32 +148,32 @@ class Task_Roster:
         embed.add_field(name='**Franchise Manager**',
                         value='\n'.join(
                             [f'{x.mention}' for x in
-                             member.get_members_by_role(self.bot.guild, roles.franchise_manager)]),
+                             get_members_by_role(self.bot.guild, franchise_manager)]),
                         inline=True)
         embed.add_field(name='**Rocket League General Manager**',
                         value='\n'.join(
                             [f'{x.mention}' for x in
-                             member.get_members_by_role(self.bot.guild, roles.general_manager_rl)]),
+                             get_members_by_role(self.bot.guild, general_manager_rl)]),
                         inline=True)
         embed.add_field(name='**Trackmania General Managers**',
                         value='\n'.join(
                             [f'{x.mention}' for x in
-                             member.get_members_by_role(self.bot.guild, roles.general_manager_tm)]),
+                             get_members_by_role(self.bot.guild, general_manager_tm)]),
                         inline=True)
         embed.add_field(name='**Rocket League Assistant General Managers**', value='\n'.join(
-            [f'{x.mention}' for x in member.get_members_by_role(self.bot.guild, roles.assistant_general_manager_rl)]),
+            [f'{x.mention}' for x in get_members_by_role(self.bot.guild, assistant_general_manager_rl)]),
                         inline=False)
         embed.add_field(name='**Trackmania Assistant General Managers**', value='\n'.join(
-            [f'{x.mention}' for x in member.get_members_by_role(self.bot.guild, roles.assistant_general_manager_tm)]),
+            [f'{x.mention}' for x in get_members_by_role(self.bot.guild, assistant_general_manager_tm)]),
                         inline=False)
         embed.add_field(name='**Captains**',
                         value='\n'.join(
-                            [f'{x.mention}' for x in member.get_members_by_role(self.bot.guild, roles.captain)]),
+                            [f'{x.mention}' for x in get_members_by_role(self.bot.guild, captain)]),
                         inline=True)
         embed.add_field(name='**Social Media**',
                         value='\n'.join(
                             [f'{x.mention}' for x in
-                             member.get_members_by_role(self.bot.guild, roles.social_media)]),
+                             get_members_by_role(self.bot.guild, social_media)]),
                         inline=False)
         return embed
 
@@ -178,7 +183,7 @@ class Task_Roster:
                        descr: str = '') -> discord.Embed:
         embed = discord.Embed(color=self.bot.default_embed_color, title=f'**{league} League**',
                               description=f'{descr}\n')
-        embed.description += '\n'.join(self.__strobe_league_members__(member.get_members_by_role(self.bot.guild, role)))
+        embed.description += '\n'.join(self.__strobe_league_members__(get_members_by_role(self.bot.guild, role)))
         return embed
 
     @staticmethod
@@ -252,18 +257,18 @@ class Task_Roster:
         staff_msg = await context.send(embed=self.__get_staff__())
         if self.bot.franchise.premier_league is not None:
             await channels.post_image(context, IMG_PREMIER) if IMG_PREMIER else None
-            premier_msg = await context.send(embed=self.__get_league__('Premier', roles.premier))
+            premier_msg = await context.send(embed=self.__get_league__('Premier', premier))
         else:
             premier_msg = None
         await channels.post_image(context, IMG_MASTER) if IMG_MASTER else None
-        master_msg = await context.send(embed=self.__get_league__('Master', roles.master))
+        master_msg = await context.send(embed=self.__get_league__('Master', master))
         await channels.post_image(context, IMG_CHAMPION) if IMG_CHAMPION else None
-        champion_msg = await context.send(embed=self.__get_league__('Champion', roles.champion))
+        champion_msg = await context.send(embed=self.__get_league__('Champion', champion))
         await channels.post_image(context, IMG_ACADEMY) if IMG_ACADEMY else None
-        academy_msg = await context.send(embed=self.__get_league__('Academy', roles.academy))
+        academy_msg = await context.send(embed=self.__get_league__('Academy', academy))
         if self.bot.franchise.foundation_league is not None:
             await channels.post_image(context, IMG_FOUNDATION) if IMG_FOUNDATION else None
-            foundation_msg = await context.send(embed=self.__get_league__('Foundation', roles.foundation))
+            foundation_msg = await context.send(embed=self.__get_league__('Foundation', foundation))
         else:
             foundation_msg = None
         await err('Roster has been successfully been re-created!')

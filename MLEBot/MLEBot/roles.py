@@ -1,13 +1,18 @@
+#!/usr/bin/env python
 """ Discord Roles Module for use in Minor League E-Sports
 # Author: irox_rl
 # Purpose: General Functions of Discord Roles
+# Version 1.0.2
 """
+
+# local imports #
+from .enums import Enum, LeagueEnum
+from .member import has_role as member_has_role
+
+# non-local imports #
 import copy
 import discord
 import dotenv
-
-import enums
-import member
 import os
 
 """ Constants
@@ -53,7 +58,7 @@ GENERAL_MANAGER_TM = os.getenv('ROLE_GM_TM')
 ASSISTANT_GENERAL_MANAGER_RL = os.getenv('ROLE_AGM_RL')
 ASSISTANT_GENERAL_MANAGER_TM = os.getenv('ROLE_AGM_TM')
 CAPTAIN = os.getenv('ROLE_CAPTAIN_RL')
-PREMIER_LEAGUE = os.getenv('ROLE_PL')
+PREMIER_LEAGUE: str = os.getenv('ROLE_PL')
 MASTER_LEAGUE = os.getenv('ROLE_ML')
 CHAMPION_LEAGUE = os.getenv('ROLE_CL')
 ACADEMY_LEAGUE = os.getenv('ROLE_AL')
@@ -177,22 +182,22 @@ def get_role_by_name(guild: discord.Guild, name: str) -> discord.Role | None:
     return next((x for x in guild.roles if x.name == name), None)
 
 
-def get_role_by_league(self, league: enums.LeagueEnum):
+def get_role_by_league(self, league: LeagueEnum):
     match league:
-        case enums.LeagueEnum.Premier_League:
+        case LeagueEnum.Premier_League:
             return self.premier
-        case enums.LeagueEnum.Master_League:
+        case LeagueEnum.Master_League:
             return self.master
-        case enums.LeagueEnum.Champion_League:
+        case LeagueEnum.Champion_League:
             return self.champion
-        case enums.LeagueEnum.Academy_League:
+        case LeagueEnum.Academy_League:
             return self.academy
-        case enums.LeagueEnum.Foundation_League:
+        case LeagueEnum.Foundation_League:
             return self.foundation
 
 
 def has_role(_member: discord.user, *roles) -> bool:
-    return member.has_role(_member, *roles)
+    return member_has_role(_member, *roles)
 
 
 def resolve_sprocket_league_role(sprocket_league: str) -> str | None:

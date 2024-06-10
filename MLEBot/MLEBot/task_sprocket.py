@@ -1,12 +1,19 @@
+#!/usr/bin/env python
 """ Sprocket Periodic Task
 # Author: irox_rl
 # Purpose: Get MLE information hosted from sprocket for use in parsing sprocket_data
+# Version 1.0.2
 """
+
+from PyDiscoBot.PyDiscoBot import err
+
+# local imports #
+from .sprocket_data_link import SprocketDataLink
+
+# non-local imports #
 import datetime
 import discord
-from err import err
 import pickle
-from sprocket_data_link import SprocketDataLink
 
 
 class Task_Sprocket:

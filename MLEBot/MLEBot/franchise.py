@@ -1,14 +1,19 @@
+#!/usr/bin/env python
 """ Minor League E-Sports Franchise
 # Author: irox_rl
 # Purpose: General Functions of a League Franchise
-# Version 3.00.01
+# Version 1.0.2
 """
+
+# local imports #
+from .enums import *
+from .member import Member
+from .team import Team
+
+# non-local imports #
 import discord
 from discord.ext import commands
-import enums
-import member
 import os
-import team
 
 
 class Franchise:
@@ -30,22 +35,22 @@ class Franchise:
         self.bot = master_bot
         self.guild = guild
         self.franchise_name = os.getenv('TEAM_NAME')
-        self.premier_league = team.Team(self.guild,
-                                        self,
-                                        enums.LeagueEnum.Premier_League) if not disable_premier_league else None
+        self.premier_league = Team(self.guild,
+                                   self,
+                                   LeagueEnum.Premier_League) if not disable_premier_league else None
         self.premier_disabled = True if self.premier_league is None else False
-        self.master_league = team.Team(self.guild,
-                                       self,
-                                       enums.LeagueEnum.Master_League)
-        self.champion_league = team.Team(self.guild,
-                                         self,
-                                         enums.LeagueEnum.Champion_League)
-        self.academy_league = team.Team(self.guild,
-                                        self,
-                                        enums.LeagueEnum.Academy_League)
-        self.foundation_league = team.Team(self.guild,
-                                           self,
-                                           enums.LeagueEnum.Foundation_League) if not disable_foundation_league else None
+        self.master_league = Team(self.guild,
+                                  self,
+                                  LeagueEnum.Master_League)
+        self.champion_league = Team(self.guild,
+                                    self,
+                                    LeagueEnum.Champion_League)
+        self.academy_league = Team(self.guild,
+                                   self,
+                                   LeagueEnum.Academy_League)
+        self.foundation_league = Team(self.guild,
+                                      self,
+                                      LeagueEnum.Foundation_League) if not disable_foundation_league else None
         self.foundation_disabled = True if self.foundation_league is None else False
 
     @property
@@ -62,7 +67,7 @@ class Franchise:
         return lst
 
     @property
-    def teams(self) -> [team.Team]:
+    def teams(self) -> [Team]:
         lst = []
         if self.premier_league:
             lst.append(self.premier_league)
@@ -77,7 +82,7 @@ class Franchise:
         return lst
 
     def add_member(self,
-                   _member: member.Member) -> bool:
+                   _member: Member) -> bool:
         """ add member to this franchise. Will be delegated based on **member.league**\n
                 **param member**: MLE Member to be added to this franchise (welcome!)\n
                 **returns** delegated success returned from the team's add method
@@ -85,18 +90,18 @@ class Franchise:
         """ Match the league and return its' return 
         """
         match _member.league:
-            case enums.LeagueEnum.Premier_League:
+            case LeagueEnum.Premier_League:
                 if not self.premier_disabled:
                     return self.premier_league.add_member(_member)
                 else:
                     return False
-            case enums.LeagueEnum.Master_League:
+            case LeagueEnum.Master_League:
                 return self.master_league.add_member(_member)
-            case enums.LeagueEnum.Champion_League:
+            case LeagueEnum.Champion_League:
                 return self.champion_league.add_member(_member)
-            case enums.LeagueEnum.Academy_League:
+            case LeagueEnum.Academy_League:
                 return self.academy_league.add_member(_member)
-            case enums.LeagueEnum.Foundation_League:
+            case LeagueEnum.Foundation_League:
                 if not self.foundation_disabled:
                     return self.foundation_league.add_member(_member)
                 else:
@@ -108,7 +113,7 @@ class Franchise:
                         **returns**: None
                         """
         for mem in self.guild.members:
-            league_member = member.Member(mem)
+            league_member = Member(mem)
             if league_member.league:
                 self.add_member(league_member)
 
@@ -135,7 +140,7 @@ class Franchise:
     async def post_player_quick_info(self,
                                      player: discord.Member,
                                      ctx: discord.ext.commands.Context):
-        _member = member.Member(player)
+        _member = Member(player)
         await _member.__build_from_sprocket__(self.bot.sprocket.data)
         await _member.post_quick_info(ctx)
 
@@ -158,11 +163,11 @@ class Franchise:
             ***returns***: status string\n
         """
         if not self.premier_disabled:
-            self.premier_league = team.Team(self.guild, self, enums.LeagueEnum.Premier_League)
-        self.master_league = team.Team(self.guild, self, enums.LeagueEnum.Master_League)
-        self.champion_league = team.Team(self.guild, self, enums.LeagueEnum.Champion_League)
-        self.academy_league = team.Team(self.guild, self, enums.LeagueEnum.Academy_League)
+            self.premier_league = Team(self.guild, self, LeagueEnum.Premier_League)
+        self.master_league = Team(self.guild, self, LeagueEnum.Master_League)
+        self.champion_league = Team(self.guild, self, LeagueEnum.Champion_League)
+        self.academy_league = Team(self.guild, self, LeagueEnum.Academy_League)
         if not self.foundation_disabled:
-            self.foundation_league = team.Team(self.guild, self, enums.LeagueEnum.Foundation_League)
+            self.foundation_league = Team(self.guild, self, LeagueEnum.Foundation_League)
         await self.build()
         return 'Userbase has been successfully rebuilt!'
