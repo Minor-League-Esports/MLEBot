@@ -130,7 +130,7 @@ class Task_Roster:
         return True
 
     def __get_header__(self) -> discord.Embed:
-        embed = discord.Embed(color=discord.Color.dark_red(), title=f'**{self.bot.franchise.franchise_name} Roster**\n',
+        embed = discord.Embed(color=self.bot.default_embed_color, title=f'**{self.bot.franchise.franchise_name} Roster**\n',
                               description=f"For help, type 'ub.help'\n"
                                           f"Hello! I'm the your Utility Bot!")
         embed.add_field(name='Version', value=self.bot.version, inline=True)
@@ -138,7 +138,7 @@ class Task_Roster:
         return embed
 
     def __get_staff__(self) -> discord.Embed:
-        embed = discord.Embed(color=discord.Color.dark_red(), title='**Franchise Staff**\n\n',
+        embed = discord.Embed(color=self.bot.default_embed_color, title='**Franchise Staff**\n\n',
                               description="")
         embed.add_field(name='**Franchise Manager**',
                         value='\n'.join(
@@ -176,7 +176,7 @@ class Task_Roster:
                        league: str,
                        role: discord.Role,
                        descr: str = '') -> discord.Embed:
-        embed = discord.Embed(color=discord.Color.dark_red(), title=f'**{league} League**',
+        embed = discord.Embed(color=self.bot.default_embed_color, title=f'**{league} League**',
                               description=f'{descr}\n')
         embed.description += '\n'.join(self.__strobe_league_members__(member.get_members_by_role(self.bot.guild, role)))
         return embed
