@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="TeamQuickInfo.css">
+</head>
+<body>
+<div id="shadowbox">
+    <div name="QuickInfo" style="
+        height: fit-content;
+        width: 570px;
+        margin: 5px;
+        margin-bottom: 20px;
+        padding-top: 1px;
+        padding-left: 10px;
+        padding-right: 5px;
+        padding-bottom: 5px;
+        border-radius: 10px 10px 10px 10px;
+        background: #1C1C1C;
+        background: -moz-linear-gradient(left, #1C1C1C 0%, #2A2A2A 50%, #373737 100%);
+        background: -webkit-linear-gradient(left, #1C1C1C 0%, #2A2A2A 50%, #373737 100%);
+        background: linear-gradient(to right, #1C1C1C 0%, #2A2A2A 50%, #373737 100%);
+        -webkit-box-shadow: 5px 5px 15px 5px #000000;
+        box-shadow: 5px 5px 15px 5px #000000;
+        display: flex;
+        flex-direction: row;
+        ">
+        <div style="
+    height: 50px;
+    width: 520px;
+    margin-bottom: 40px;
+                ">
+            <h3 style=
+                        "text-align: left;
+                        color: white;
+                        font-family: Verdana Black, Gadget, sans-serif;
+                        text-shadow: 4px 4px 4px black;
+                        font-size: 30px;
+                        width: fit-content;
+                        white-space: nowrap;">
+            {league:}
+        </h3>
+        </div>
+        <img id="teamLogo" src={team_img:} style="height: 90px; width: auto">
+    </div>
+
+    <long_banner_div name="SeriesBanner">
+                <game_mode_div></game_mode_div>
+                <series_banner_div>Series Wins</series_banner_div>
+                <series_banner_div>Series Losses</series_banner_div>
+                <series_banner_div>Game Wins</series_banner_div>
+                <series_banner_div style=
+                                           "border-radius: 0px 10px 10px 0px;
+                ">Game Losses</series_banner_div>
+
+    </long_banner_div>
+<long_banner_div name="StandardInfo">
+    <game_mode_div>
+        Standard
+    </game_mode_div>
+    <win_loss_div>
+        {std_series_wins:}
+    </win_loss_div>
+    <win_loss_div>
+        {std_series_losses:}
+    </win_loss_div>
+    <win_loss_div>
+        {std_game_wins:}
+    </win_loss_div>
+    <win_loss_div>
+        {std_game_losses:}
+    </win_loss_div>
+</long_banner_div>
+
+<long_banner_div name="DoublesInfo">
+    <game_mode_div>
+        Doubles
+    </game_mode_div>
+    <win_loss_div>
+        {dbl_series_wins:}
+    </win_loss_div>
+    <win_loss_div>
+        {dbl_series_losses:}
+    </win_loss_div>
+    <win_loss_div>
+        {dbl_game_wins:}
+    </win_loss_div>
+    <win_loss_div>
+        {dbl_game_losses:}
+    </win_loss_div>
+</long_banner_div>
+
+<short_banner_div name="PlayerRoleBanner">
+                <game_mode_div style="top: -1px;">Role</game_mode_div>
+
+                <series_banner_div>Name</series_banner_div>
+
+                <series_banner_div  style=
+                                           "border-radius: 0px 10px 10px 0px;
+                ">Scheduler</series_banner_div>
+</short_banner_div>
+
+<short_banner_div name="playerA">
+                <game_mode_div style="top: -1px;">PLAYERA</game_mode_div>
+
+    <win_loss_div>
+        {player_a_mle_name:}
+    </win_loss_div>
+    <win_loss_div>
+        <img class="scheduler_img" src={player_a_emote:} onerror="this.style.display='none'">
+    </win_loss_div>
+    </short_banner_div>
+
+<short_banner_div name="playerB">
+                <game_mode_div style="top: -1px;">PLAYERB</game_mode_div>
+
+    <win_loss_div>
+        {player_b_mle_name:}
+    </win_loss_div>
+    <win_loss_div>
+        <img class="scheduler_img" src={player_b_emote:} onerror="this.style.display='none'">
+    </win_loss_div>
+    </short_banner_div>
+
+<short_banner_div name="playerC">
+                <game_mode_div style="top: -1px;">PLAYERC</game_mode_div>
+
+    <win_loss_div>
+        {player_c_mle_name:}
+    </win_loss_div>
+    <win_loss_div>
+        <img class="scheduler_img" src={player_c_emote:} onerror="this.style.display='none'">
+    </win_loss_div>
+    </short_banner_div>
+
+<short_banner_div name="playerD">
+                <game_mode_div style="top: -1px;">PLAYERD</game_mode_div>
+
+    <win_loss_div>
+        {player_d_mle_name:}
+    </win_loss_div>
+    <win_loss_div>
+        <img class="scheduler_img" src={player_d_emote:} onerror="this.style.display='none'">
+    </win_loss_div>
+    </short_banner_div>
+
+<short_banner_div name="playerE">
+                <game_mode_div style="top: -1px;">PLAYERE</game_mode_div>
+
+    <win_loss_div>
+        {player_e_mle_name:}
+    </win_loss_div>
+    <win_loss_div>
+        <img class="scheduler_img" src={player_e_emote:} onerror="this.style.display='none'">
+    </win_loss_div>
+    </short_banner_div>
+
+<short_banner_div name="playerF">
+                <game_mode_div style="top: -1px;">PLAYERF</game_mode_div>
+
+    <win_loss_div>
+        {player_f_mle_name:}
+    </win_loss_div>
+    <win_loss_div>
+        <img class="scheduler_img" src={player_f_emote:} onerror="this.style.display='none'">
+    </win_loss_div>
+    </short_banner_div>
+
+ <short_banner_div name="playerG">
+                <game_mode_div style="top: -1px;">PLAYERG</game_mode_div>
+
+    <win_loss_div>
+        {player_g_mle_name:}
+    </win_loss_div>
+    <win_loss_div>
+        <img class="scheduler_img" src={player_g_emote:} onerror="this.style.display='none'">
+    </win_loss_div>
+    </short_banner_div>
+
+<short_banner_div name="playerH">
+                <game_mode_div style="top: -1px;">PLAYERH</game_mode_div>
+
+    <win_loss_div>
+        {player_h_mle_name:}
+    </win_loss_div>
+    <win_loss_div>
+        <img class="scheduler_img" src={player_h_emote:} onerror="this.style.display='none'">
+    </win_loss_div>
+    </short_banner_div>
+</div>
+
+</body>
+</html>

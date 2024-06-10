@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="TeamWeeklyStats.css">
+</head>
+<body>
+<div id="shadowbox">
+    <div name="QuickInfo" style="
+        height: fit-content;
+        width: 570px;
+        margin: 5px;
+        margin-bottom: 20px;
+        padding-top: 1px;
+        padding-left: 10px;
+        padding-right: 5px;
+        padding-bottom: 5px;
+        border-radius: 10px 10px 10px 10px;
+        background: #1C1C1C;
+        background: -moz-linear-gradient(left, #1C1C1C 0%, #2A2A2A 50%, #373737 100%);
+        background: -webkit-linear-gradient(left, #1C1C1C 0%, #2A2A2A 50%, #373737 100%);
+        background: linear-gradient(to right, #1C1C1C 0%, #2A2A2A 50%, #373737 100%);
+        -webkit-box-shadow: 5px 5px 15px 5px #000000;
+        box-shadow: 5px 5px 15px 5px #000000;
+        display: flex;
+        flex-direction: row;
+        ">
+        <div style="width: 520px;">
+            <div style="display: block;">
+                <h2>
+                    {league:}
+                </h2>
+                <h2>
+                    {mode:}
+                </h2>
+            </div>
+        </div>
+        <img id="teamLogo" src={team_img:} style="height: 90px; width: auto; align: right;">
+    </div>
+    <medium_banner_div name="SeriesBanner">
+                <top_banner_sub style="border-radius: 10px 0px 0px 10px; width: 122px;"> Week </top_banner_sub>
+                <top_banner_sub>Home</top_banner_sub>
+                <top_banner_sub>Score</top_banner_sub>
+                <top_banner_sub style="border-radius: 0px 10px 10px 0px;">Away</top_banner_sub>
+
+    </medium_banner_div>
+    <medium_banner_div name="wk_1">
+                <week_div style="border-radius: 10px 0px 0px 10px;"> Week 1</week_div>
+                <light_bg_short_div style="background: linear-gradient(to right, #111111 0%, {home_team_wk_1_clr:} 100%);">
+                    <home_div1>
+                        <img src="{home_team_wk_1_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                    </home_div1>
+                    <home_div2>
+                        {home_team_wk_1:}
+                    </home_div2>
+                </light_bg_short_div>
+                <light_bg_short_div style="background: linear-gradient(to right, {home_team_wk_1_clr:} 0%, {away_team_wk_1_clr:} 100%);">
+                    <score_div>
+                        {score_wk_1:}
+                    </score_div>
+                </light_bg_short_div>
+                <light_bg_short_div style="background: linear-gradient(to right, {away_team_wk_1_clr:} 0%, #111111 100%); border-radius: 0px 10px 10px 0px;">
+                    <away_div1>
+                        {away_team_wk_1:}
+                    </away_div1>
+                    <away_div2>
+                        <img src="{away_team_wk_1_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                    </away_div2>
+                </light_bg_short_div>
+    </medium_banner_div>
+    <medium_banner_div name="wk_2">
+                <week_div style="border-radius: 10px 0px 0px 10px;"> Week 2</week_div>
+                <light_bg_short_div style="background: linear-gradient(to right, #111111 0%, {home_team_wk_2_clr:} 100%);">
+                    <home_div1>
+                        <img src="{home_team_wk_2_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                    </home_div1>
+                    <home_div2>
+                        {home_team_wk_2:}
+                    </home_div2>
+                </light_bg_short_div>
+                <light_bg_short_div style="background: linear-gradient(to right, {home_team_wk_2_clr:} 0%, {away_team_wk_2_clr:} 100%);">
+                    <score_div>
+                        {score_wk_2:}
+                    </score_div>
+                </light_bg_short_div>
+                <light_bg_short_div style="background: linear-gradient(to right, {away_team_wk_2_clr:} 0%, #111111 100%); border-radius: 0px 10px 10px 0px;">
+                    <away_div1>
+                        {away_team_wk_2:}
+                    </away_div1>
+                    <away_div2>
+                        <img src="{away_team_wk_2_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                    </away_div2>
+                </light_bg_short_div>
+    </medium_banner_div>
+    <medium_banner_div name="wk_3">
+                <week_div style="border-radius: 10px 0px 0px 10px;"> Week 3</week_div>
+                <light_bg_short_div style="background: linear-gradient(to right, #111111 0%, {home_team_wk_3_clr:} 100%);">
+                    <home_div1>
+                        <img src="{home_team_wk_3_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                    </home_div1>
+                    <home_div2>
+                        {home_team_wk_3:}
+                    </home_div2>
+                </light_bg_short_div>
+                <light_bg_short_div style="background: linear-gradient(to right, {home_team_wk_3_clr:} 0%, {away_team_wk_3_clr:} 100%);">
+                    <score_div>
+                        {score_wk_3:}
+                    </score_div>
+                </light_bg_short_div>
+                <light_bg_short_div style="background: linear-gradient(to right, {away_team_wk_3_clr:} 0%, #111111 100%); border-radius: 0px 10px 10px 0px;">
+                    <away_div1>
+                        {away_team_wk_3:}
+                    </away_div1>
+                    <away_div2>
+                        <img src="{away_team_wk_3_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                    </away_div2>
+                </light_bg_short_div>
+    </medium_banner_div>
+    <medium_banner_div name="wk_4">
+                <week_div style="border-radius: 10px 0px 0px 10px;"> Week 4</week_div>
+                <light_bg_short_div style="background: linear-gradient(to right, #111111 0%, {home_team_wk_4_clr:} 100%);">
+                    <home_div1>
+                        <img src="{home_team_wk_4_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                    </home_div1>
+                    <home_div2>
+                        {home_team_wk_4:}
+                    </home_div2>
+                </light_bg_short_div>
+                <light_bg_short_div style="background: linear-gradient(to right, {home_team_wk_4_clr:} 0%, {away_team_wk_4_clr:} 100%);">
+                    <score_div>
+                        {score_wk_4:}
+                    </score_div>
+                </light_bg_short_div>
+                <light_bg_short_div style="background: linear-gradient(to right, {away_team_wk_4_clr:} 0%, #111111 100%); border-radius: 0px 10px 10px 0px;">
+                    <away_div1>
+                        {away_team_wk_4:}
+                    </away_div1>
+                    <away_div2>
+                        <img src="{away_team_wk_4_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                    </away_div2>
+                </light_bg_short_div>
+    </medium_banner_div>
+    <medium_banner_div name="wk_5">
+                    <week_div style="border-radius: 10px 0px 0px 10px;"> Week 5</week_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, #111111 0%, {home_team_wk_5_clr:} 100%);">
+                        <home_div1>
+                            <img src="{home_team_wk_5_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                        </home_div1>
+                        <home_div2>
+                            {home_team_wk_5:}
+                        </home_div2>
+                    </light_bg_short_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, {home_team_wk_5_clr:} 0%, {away_team_wk_5_clr:} 100%);">
+                        <score_div>
+                            {score_wk_5:}
+                        </score_div>
+                    </light_bg_short_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, {away_team_wk_5_clr:} 0%, #111111 100%); border-radius: 0px 10px 10px 0px;">
+                        <away_div1>
+                            {away_team_wk_5:}
+                        </away_div1>
+                        <away_div2>
+                            <img src="{away_team_wk_5_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                        </away_div2>
+                    </light_bg_short_div>
+        </medium_banner_div>
+    <medium_banner_div name="wk_6">
+                    <week_div style="border-radius: 10px 0px 0px 10px;"> Week 6</week_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, #111111 0%, {home_team_wk_6_clr:} 100%);">
+                        <home_div1>
+                            <img src="{home_team_wk_6_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                        </home_div1>
+                        <home_div2>
+                            {home_team_wk_6:}
+                        </home_div2>
+                    </light_bg_short_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, {home_team_wk_6_clr:} 0%, {away_team_wk_6_clr:} 100%);">
+                        <score_div>
+                            {score_wk_6:}
+                        </score_div>
+                    </light_bg_short_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, {away_team_wk_6_clr:} 0%, #111111 100%); border-radius: 0px 10px 10px 0px;">
+                        <away_div1>
+                            {away_team_wk_6:}
+                        </away_div1>
+                        <away_div2>
+                            <img src="{away_team_wk_6_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                        </away_div2>
+                    </light_bg_short_div>
+        </medium_banner_div>
+    <medium_banner_div name="wk_7">
+                    <week_div style="border-radius: 10px 0px 0px 10px;"> Week 7</week_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, #111111 0%, {home_team_wk_7_clr:} 100%);">
+                        <home_div1>
+                            <img src="{home_team_wk_7_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                        </home_div1>
+                        <home_div2>
+                            {home_team_wk_7:}
+                        </home_div2>
+                    </light_bg_short_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, {home_team_wk_7_clr:} 0%, {away_team_wk_7_clr:} 100%);">
+                        <score_div>
+                            {score_wk_7:}
+                        </score_div>
+                    </light_bg_short_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, {away_team_wk_7_clr:} 0%, #111111 100%); border-radius: 0px 10px 10px 0px;">
+                        <away_div1>
+                            {away_team_wk_7:}
+                        </away_div1>
+                        <away_div2>
+                            <img src="{away_team_wk_7_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                        </away_div2>
+                    </light_bg_short_div>
+        </medium_banner_div>
+    <medium_banner_div name="wk_8">
+                    <week_div style="border-radius: 10px 0px 0px 10px;"> Week 8</week_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, #111111 0%, {home_team_wk_8_clr:} 100%);">
+                        <home_div1>
+                            <img src="{home_team_wk_8_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                        </home_div1>
+                        <home_div2>
+                            {home_team_wk_8:}
+                        </home_div2>
+                    </light_bg_short_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, {home_team_wk_8_clr:} 0%, {away_team_wk_8_clr:} 100%);">
+                        <score_div>
+                            {score_wk_8:}
+                        </score_div>
+                    </light_bg_short_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, {away_team_wk_8_clr:} 0%, #111111 100%); border-radius: 0px 10px 10px 0px;">
+                        <away_div1>
+                            {away_team_wk_8:}
+                        </away_div1>
+                        <away_div2>
+                            <img src="{away_team_wk_8_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                        </away_div2>
+                    </light_bg_short_div>
+        </medium_banner_div>
+    <medium_banner_div name="wk_9">
+                    <week_div style="border-radius: 10px 0px 0px 10px;"> Week 9</week_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, #111111 0%, {home_team_wk_9_clr:} 100%);">
+                        <home_div1>
+                            <img src="{home_team_wk_9_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                        </home_div1>
+                        <home_div2>
+                            {home_team_wk_9:}
+                        </home_div2>
+                    </light_bg_short_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, {home_team_wk_9_clr:} 0%, {away_team_wk_9_clr:} 100%);">
+                        <score_div>
+                            {score_wk_9:}
+                        </score_div>
+                    </light_bg_short_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, {away_team_wk_9_clr:} 0%, #111111 100%); border-radius: 0px 10px 10px 0px;">
+                        <away_div1>
+                            {away_team_wk_9:}
+                        </away_div1>
+                        <away_div2>
+                            <img src="{away_team_wk_9_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                        </away_div2>
+                    </light_bg_short_div>
+        </medium_banner_div>
+    <medium_banner_div name="wk_10">
+                    <week_div style="border-radius: 10px 0px 0px 10px;"> Week 10</week_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, #111111 0%, {home_team_wk_10_clr:} 100%);">
+                        <home_div1>
+                            <img src="{home_team_wk_10_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                        </home_div1>
+                        <home_div2>
+                            {home_team_wk_10:}
+                        </home_div2>
+                    </light_bg_short_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, {home_team_wk_10_clr:} 0%, {away_team_wk_10_clr:} 100%);">
+                        <score_div>
+                            {score_wk_10:}
+                        </score_div>
+                    </light_bg_short_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, {away_team_wk_10_clr:} 0%, #111111 100%); border-radius: 0px 10px 10px 0px;">
+                        <away_div1>
+                            {away_team_wk_10:}
+                        </away_div1>
+                        <away_div2>
+                            <img src="{away_team_wk_10_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                        </away_div2>
+                    </light_bg_short_div>
+        </medium_banner_div>
+    <medium_banner_div name="wk_11">
+                    <week_div style="border-radius: 10px 0px 0px 10px;"> Week 11</week_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, #111111 0%, {home_team_wk_11_clr:} 100%);">
+                        <home_div1>
+                            <img src="{home_team_wk_11_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                        </home_div1>
+                        <home_div2>
+                            {home_team_wk_11:}
+                        </home_div2>
+                    </light_bg_short_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, {home_team_wk_11_clr:} 0%, {away_team_wk_11_clr:} 100%);">
+                        <score_div>
+                            {score_wk_11:}
+                        </score_div>
+                    </light_bg_short_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, {away_team_wk_11_clr:} 0%, #111111 100%); border-radius: 0px 10px 10px 0px;">
+                        <away_div1>
+                            {away_team_wk_11:}
+                        </away_div1>
+                        <away_div2>
+                            <img src="{away_team_wk_11_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                        </away_div2>
+                    </light_bg_short_div>
+        </medium_banner_div>
+    <medium_banner_div name="wk_12">
+                    <week_div style="border-radius: 10px 0px 0px 10px;"> Week 12</week_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, #111111 0%, {home_team_wk_12_clr:} 100%);">
+                        <home_div1>
+                            <img src="{home_team_wk_12_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                        </home_div1>
+                        <home_div2>
+                            {home_team_wk_12:}
+                        </home_div2>
+                    </light_bg_short_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, {home_team_wk_12_clr:} 0%, {away_team_wk_12_clr:} 100%);">
+                        <score_div>
+                            {score_wk_12:}
+                        </score_div>
+                    </light_bg_short_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, {away_team_wk_12_clr:} 0%, #111111 100%); border-radius: 0px 10px 10px 0px;">
+                        <away_div1>
+                            {away_team_wk_12:}
+                        </away_div1>
+                        <away_div2>
+                            <img src="{away_team_wk_12_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                        </away_div2>
+                    </light_bg_short_div>
+        </medium_banner_div>
+    <medium_banner_div name="wk_13">
+                    <week_div style="border-radius: 10px 0px 0px 10px;"> Week 13</week_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, #111111 0%, {home_team_wk_13_clr:} 100%);">
+                        <home_div1>
+                            <img src="{home_team_wk_13_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                        </home_div1>
+                        <home_div2>
+                            {home_team_wk_13:}
+                        </home_div2>
+                    </light_bg_short_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, {home_team_wk_13_clr:} 0%, {away_team_wk_13_clr:} 100%);">
+                        <score_div>
+                            {score_wk_13:}
+                        </score_div>
+                    </light_bg_short_div>
+                    <light_bg_short_div style="background: linear-gradient(to right, {away_team_wk_13_clr:} 0%, #111111 100%); border-radius: 0px 10px 10px 0px;">
+                        <away_div1>
+                            {away_team_wk_13:}
+                        </away_div1>
+                        <away_div2>
+                            <img src="{away_team_wk_13_logo:}" style="height: 30px; width: 30px;" onerror="this.style.display='none'">
+                        </away_div2>
+                    </light_bg_short_div>
+        </medium_banner_div>
+</div>
+
+</body>
+</html>
