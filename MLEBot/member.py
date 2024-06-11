@@ -2,7 +2,7 @@
 """ Minor League E-Sports Member
 # Author: irox_rl
 # Purpose: General Functions of a League Member
-# Version 1.0.2
+# Version 1.0.4
 """
 
 # local imports #
@@ -31,6 +31,8 @@ class Member:
         self.league: LeagueEnum | None = self.__get_league_role__(self.discord_member) if self.discord_member else None
         self.mle_name: str | None = None
         self.mle_id = None
+        self.mle_player_id = None
+        self.member_id = None
         self.sprocket_id = None
         self.schedule_confirmed = False
         self.salary = None
@@ -82,18 +84,22 @@ class Member:
         """ Update sprocket_id from sprocket_players.json data from sprocket database """
         if not sprocket_players:
             return
-        player = next((x for x in sprocket_players if x['name'] == self.mle_name), None)
+        player = next((x for x in sprocket_players if x['member_id'] == self.member_id), None)
         if not player:
-            return print(f'User {self.discord_member.name} could not be found in sprocket player data. Cannot Continue...')
+            return
         self.sprocket_id = player['member_id']
+        self.salary = player['salary']
+        self.role = player['slot']
+        self.scrim_points = player['current_scrim_points']
+        self.eligible = True if self.scrim_points >= 30 else False
 
     async def __update_from_sprocket_player_stats__(self,
                                                     sprocket_player_stats):
         if not sprocket_player_stats:
             return
-        player_stats = next((x for x in sprocket_player_stats if x['member_id'] == self.sprocket_id), None)
+        player_stats = next((x for x in sprocket_player_stats if x['member_id'] == self.member_id), None)
         if not player_stats:
-            return print(f'User {self.discord_member.name} could not be found in sprocket metabase. Cannot continue...')
+            return
         self.dpi = player_stats['dpi']
         self.gpi = player_stats['gpi']
         self.opi = player_stats['opi']
@@ -105,57 +111,21 @@ class Member:
         self.goals_against = player_stats['goals_against']
         self.shots_against = player_stats['shots_against']
 
-    async def __update_from_stonks__(self,
-                                     stonks_data) -> None:
-        """ Update mle_name, id, salary, eligibility, scrim points and role from Stonks Metabase """
-        if not stonks_data:
+    async def __update_from_members__(self,
+                                      sprocket_members: {}) -> None:
+        if not sprocket_members:
             return
-        member = next((x for x in stonks_data if x['Discord ID'] == self.discord_member.id.__str__()), None)
+        member = next((x for x in sprocket_members if x['discord_id'] == self.discord_member.id.__str__()), None)
         if not member:
             return
-        self.mle_name = member['Player Name']
-        self.mle_id = member['mleid']
-        self.salary = member['Salary']
-        self.eligible = True if member['Eligible?'] == 'Yes' else False
-        self.scrim_points = member['Scrim Points']
-        self.role = member['Slot']
-
-    async def __build_from_sprocket__(self,
-                                      sprocket_data: {}):
-        if not sprocket_data:
-            return
-        await self.__update_from_stonks__(sprocket_data['stonks'])
-        await self.__update_from_sprocket_players__(sprocket_data['sprocket_players'])
-        await self.__update_from_sprocket_player_stats__(sprocket_data['sprocket_player_stats'])
-        return self
-
-    def compress(self) -> {}:
-        return {
-            'name': self.discord_member.name,
-            'mle_name': self.mle_name,
-            'mle_id': self.mle_id,
-            'id': self.discord_member.id,
-            'league': self.league.value,
-            'schedule_confirmed': self.schedule_confirmed,
-            'salary': self.salary,
-            'scrim_points': self.scrim_points,
-            'eligible': self.eligible,
-            'role': self.role,
-            'dpi': self.dpi,
-            'gpi': self.gpi,
-            'opi': self.opi,
-            'goals': self.goals,
-            'saves': self.saves,
-            'score': self.score,
-            'shots': self.shots,
-            'assists': self.assists,
-            'goals_against': self.goals_against,
-            'shots_against': self.shots_against,
-        }
+        self.mle_name = member['name']
+        self.member_id = member['member_id']
+        self.mle_id = member['mle_id']
+        self.mle_player_id = member['mle_player_id']
 
     async def post_quick_info(self, ctx: discord.ext.commands.Context):
-        embed = discord.Embed(color=discord.Color.dark_red(), title=f'**{self.discord_member} Quick Info**',
-                              description='Quick info gathered by MLE docs\n')
+        embed = discord.Embed(color=discord.Color.dark_red(), title=f'**{self.mle_name} Quick Info**',
+                              description='Quick info gathered by sprocket public datasets.\n')
         embed.add_field(name='`Name`', value=self.discord_member.name, inline=True)
         embed.add_field(name='`Display Name`', value=self.discord_member.mention, inline=True)
         embed.add_field(name='`MLE Name`', value=self.mle_name, inline=True)
@@ -165,49 +135,24 @@ class Member:
         embed.add_field(name='Scrim Points', value=self.scrim_points, inline=True)
         embed.add_field(name='Eligible?', value=self.eligible, inline=True)
         embed.add_field(name='Role', value=self.role, inline=True)
-        # embed.add_field(name='dpi', value=self.dpi, inline=True)  # This is disabled until sprocket gives out better data(?)
-        # embed.add_field(name='opi', value=self.opi, inline=True)
-        # embed.add_field(name='goals', value=self.goals, inline=True)
-        # embed.add_field(name='saves', value=self.saves, inline=True)
-        # embed.add_field(name='score', value=self.score, inline=True)
-        # embed.add_field(name='shots', value=self.shots, inline=True)
-        # embed.add_field(name='assists', value=self.assists, inline=True)
-        # embed.add_field(name='goals_against', value=self.goals_against, inline=True)
-        # embed.add_field(name='shots_against', value=self.shots_against, inline=True)
+        embed.add_field(name='dpi', value=self.dpi, inline=True)  # This is disabled until sprocket gives out better data(?)
+        embed.add_field(name='opi', value=self.opi, inline=True)
+        embed.add_field(name='goals', value=self.goals, inline=True)
+        embed.add_field(name='saves', value=self.saves, inline=True)
+        embed.add_field(name='score', value=self.score, inline=True)
+        embed.add_field(name='shots', value=self.shots, inline=True)
+        embed.add_field(name='assists', value=self.assists, inline=True)
+        embed.add_field(name='goals_against', value=self.goals_against, inline=True)
+        embed.add_field(name='shots_against', value=self.shots_against, inline=True)
         await ctx.send(embed=embed)
 
     async def update(self, sprocket_data: {}):
-        await self.__build_from_sprocket__(sprocket_data)
-
-    @classmethod
-    def from_pickle(cls,
-                    guild: discord.Guild,
-                    data: {}) -> Self:
-        tracked_member = cls(get_member_by_name(guild,
-                                                data['name']))
-        try:
-            tracked_member.mle_name = data['mle_name']
-            tracked_member.mle_id = data['mle_id']
-            tracked_member.schedule_confirmed = data['schedule_confirmed']
-            tracked_member.salary = data['salary']
-            tracked_member.scrim_points = data['scrim_points']
-            tracked_member.eligible = data['eligible']
-            tracked_member.role = data['role']
-            tracked_member.dpi = data['dpi']
-            tracked_member.gpi = data['gpi']
-            tracked_member.opi = data['opi']
-            tracked_member.goals = data['goals']
-            tracked_member.saves = data['saves']
-            tracked_member.score = data['score']
-            tracked_member.shots = data['shots']
-            tracked_member.assists = data['assists']
-            tracked_member.goals_against = data['goals_against']
-            tracked_member.shots_against = data['shots_against']
-        except AttributeError:
-            pass
-        except KeyError:
-            pass
-        return tracked_member
+        if not sprocket_data:
+            return
+        await self.__update_from_members__(sprocket_data['sprocket_members'])
+        await self.__update_from_sprocket_players__(sprocket_data['sprocket_players'])
+        await self.__update_from_sprocket_player_stats__(sprocket_data['sprocket_player_stats'])
+        return self
 
 
 def get_member_by_id(guild: discord.Guild, member_id: int) -> discord.Member | None:

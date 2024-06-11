@@ -2,7 +2,7 @@
 """ Minor League E-Sports Franchise
 # Author: irox_rl
 # Purpose: General Functions of a League Franchise
-# Version 1.0.2
+# Version 1.0.4
 """
 
 # local imports #
@@ -117,6 +117,22 @@ class Franchise:
             if league_member.league:
                 self.add_member(league_member)
 
+    async def get_team_eligibility(self,
+                                   team: LeagueEnum):
+        if team == LeagueEnum.Premier_League and self.premier_league:
+            _players = await self.premier_league.get_updated_players()
+        elif team == LeagueEnum.Master_League and self.master_league:
+            _players = await self.master_league.get_updated_players()
+        elif team == LeagueEnum.Champion_League and self.champion_league:
+            _players = await self.champion_league.get_updated_players()
+        elif team == LeagueEnum.Academy_League and self.academy_league:
+            _players = await self.academy_league.get_updated_players()
+        elif team == LeagueEnum.Foundation_League and self.foundation_league:
+            _players = await self.foundation_league.get_updated_players()
+        else:
+            _players = None
+        return sorted(_players, key=lambda x: x.role)
+
     async def init(self,
                    guild: discord.Guild):
         """ initialization method\n
@@ -141,7 +157,7 @@ class Franchise:
                                      player: discord.Member,
                                      ctx: discord.ext.commands.Context):
         _member = Member(player)
-        await _member.__build_from_sprocket__(self.bot.sprocket.data)
+        await _member.update(self.bot.sprocket.data)
         await _member.post_quick_info(ctx)
 
     async def post_season_stats_html(self,
@@ -158,9 +174,7 @@ class Franchise:
                                              ctx)
 
     async def rebuild(self) -> None:
-        """ rebuild franchise\n
-            ***param members***: list of members to build from\n
-            ***returns***: status string\n
+        """ rebuild franchise
         """
         if not self.premier_disabled:
             self.premier_league = Team(self.guild, self, LeagueEnum.Premier_League)

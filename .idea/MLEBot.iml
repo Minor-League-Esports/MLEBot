@@ -5,7 +5,10 @@
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/MLEBot/.venv" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.11 (MLEBot) (2)" jdkType="Python SDK" />
+    <content url="file://$MODULE_DIR$/../PyDiscoBot">
+      <sourceFolder url="file://$MODULE_DIR$/../PyDiscoBot/PyDiscoBot" isTestSource="false" />
+    </content>
+    <orderEntry type="jdk" jdkName="Python 3.11 (MLEBot)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

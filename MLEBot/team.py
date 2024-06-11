@@ -2,7 +2,7 @@
 """ Minor League E-Sports Team
 # Author: irox_rl
 # Purpose: General Functions of a League Team
-# Version 1.0.2
+# Version 1.0.4
 """
 
 from PyDiscoBot import channels, err
@@ -531,41 +531,6 @@ class Team:
                 """
         await self.___post_season_stats_html__('Doubles')
 
-    def compress(self):
-        return {
-            'sprocket_players': [x.compress() for x in self.players],
-            'message_id': self.message_id,
-            'standard_series_wins': self.standard_series_wins,
-            'standard_series_losses': self.standard_series_losses,
-            'standard_wins': self.standard_wins,
-            'standard_losses': self.standard_losses,
-            'doubles_series_wins': self.doubles_series_wins,
-            'doubles_series_losses': self.doubles_series_losses,
-            'doubles_wins': self.doubles_wins,
-            'doubles_losses': self.doubles_losses,
-        }
-
-    async def decompress(self, pickle_data, guild: discord.Guild, channel: discord.TextChannel):
-        self.guild = guild
-        self.channel = channel
-        for data in pickle_data['sprocket_players']:
-            self.add_member(Member.from_pickle(self.guild,
-                                                      data))
-        if pickle_data['message_id']:
-            self.message_id = pickle_data['message_id']
-            self.message = await channels.get_channel_message_by_id(self.channel, self.message_id.__str__())
-        try:
-            self.standard_series_wins = pickle_data['standard_series_wins']
-            self.standard_series_losses = pickle_data['standard_series_losses']
-            self.standard_wins = pickle_data['standard_wins']
-            self.standard_losses = pickle_data['standard_losses']
-            self.doubles_series_wins = pickle_data['doubles_series_wins']
-            self.doubles_series_losses = pickle_data['doubles_series_losses']
-            self.doubles_wins = pickle_data['doubles_wins']
-            self.doubles_losses = pickle_data['doubles_losses']
-        except KeyError:
-            pass
-
     def get_played_matches(self, sprocket_matches: {}, sprocket_match_groups: {}) -> [{}] or None:
         """ Get played matches from sprocket data\n
         **param sprocket_matches**: dictionary of matches.json from sprocket (usually supplied by sprocket class)\n
@@ -601,6 +566,11 @@ class Team:
         self.played_matches = [x for x in valid_season_matches if
                                (x['winning_team'] != "Not Played / Data Unavailable")]
         return self.played_matches
+
+    async def get_updated_players(self) -> [Member]:
+        for player in self.players:
+            await player.update(self.franchise.bot.sprocket.data)
+        return self.players
 
     def remove_member(self, _member: Member) -> bool:
         if _member in self.players:
