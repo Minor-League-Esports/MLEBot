@@ -4,7 +4,9 @@
 # Version 1.0.2
 """
 
-from PyDiscoBot import Bot, channels, commands
+from PyDiscoBot import Bot
+from PyDiscoBot import channels
+from PyDiscoBot.commands import Commands
 
 # local imports #
 from MLEBot.franchise import Franchise
@@ -169,6 +171,6 @@ if __name__ == '__main__':
 
     bot = MLEBot('ub.',
                  intents,
-                 [commands.Commands, MLECommands])
+                 [Commands, MLECommands])
 
     bot.run(os.getenv('DISCORD_TOKEN'))

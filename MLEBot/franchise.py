@@ -157,7 +157,7 @@ class Franchise:
         await _league.post_season_stats_html('Doubles',
                                              ctx)
 
-    async def rebuild(self) -> str:
+    async def rebuild(self) -> None:
         """ rebuild franchise\n
             ***param members***: list of members to build from\n
             ***returns***: status string\n
@@ -170,4 +170,3 @@ class Franchise:
         if not self.foundation_disabled:
             self.foundation_league = Team(self.guild, self, LeagueEnum.Foundation_League)
         await self.build()
-        return 'Userbase has been successfully rebuilt!'

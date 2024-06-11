@@ -120,6 +120,7 @@ ALL_MLE_ROLES = [
     Pend,
 ]
 
+FRANCHISE_ROLES = []
 GENERAL_MGMT_ROLES = []
 CAPTAIN_ROLES = []
 
@@ -152,7 +153,7 @@ def init(guild: discord.Guild):
     global champion
     global academy
     global foundation
-    global GENERAL_MGMT_ROLES, CAPTAIN_ROLES
+    global FRANCHISE_ROLES, GENERAL_MGMT_ROLES, CAPTAIN_ROLES
 
     social_media = get_role_by_name(guild, SOCIAL_MEDIA)
     franchise_manager = get_role_by_name(guild, FRANCHISE_MANAGER)
@@ -166,6 +167,19 @@ def init(guild: discord.Guild):
     champion = get_role_by_name(guild, CHAMPION_LEAGUE)
     academy = get_role_by_name(guild, ACADEMY_LEAGUE)
     foundation = get_role_by_name(guild, FOUNDATION_LEAGUE)
+
+    FRANCHISE_ROLES = [franchise_manager,
+                       general_manager_rl,
+                       general_manager_tm,
+                       assistant_general_manager_rl,
+                       assistant_general_manager_tm,
+                       captain,
+                       premier,
+                       master,
+                       champion,
+                       academy,
+                       foundation,
+                       social_media]
 
     GENERAL_MGMT_ROLES = [franchise_manager,
                           general_manager_rl,
