@@ -19,8 +19,13 @@ You can find an example in the following github repo!
 
 Start off by creating a new project and adding both this repository and PyDiscoBot to your project either directly or via PyPi! Super Easy!
 ``` python
-python -m pip install MLEBot
-python -m pip install PyDiscoBot
+pip install MLEBot
+pip install PyDiscoBot
+```
+
+You can easily install the requirements via python's pip module!
+```python
+pip install -r requirements.txt
 ```
 
 ### :memo: Fill out the .env file to customize your bot! :memo:
