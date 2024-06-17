@@ -12,7 +12,6 @@ import MLEBot.roles
 # non-local imports #
 import discord
 from discord.ext import commands
-from typing import Self
 
 # constants
 EMOTE_CHECK_GREEN = ':white_check_mark:'

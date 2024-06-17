@@ -2,16 +2,20 @@
 """ Minor League E-Sports Bot Commands
 # Author: irox_rl
 # Purpose: General Functions and Commands
-# Version 1.0.4
+# Version 1.0.6
+#
+# v1.0.6 - include salary caps, update formatting for teamlookup and teameligibility
+#           add teaminfo command
 """
 import PyDiscoBot
-from PyDiscoBot import channels, err
+from PyDiscoBot import channels
 
 # local imports #
 from MLEBot.enums import *
 from MLEBot.member import Member, has_role
 import MLEBot.roles
 from MLEBot.team import get_league_text
+from MLEBot.franchise import SALARY_CAP_PL, SALARY_CAP_ML, SALARY_CAP_CL, SALARY_CAP_AL, SALARY_CAP_FL
 
 # non-local imports #
 import discord
@@ -71,19 +75,19 @@ class MLECommands(commands.Cog):
     async def get_public_cmds_channel(self):
         return self.bot.public_commands_channel
 
-    @commands.command(name='buildmembers', description='Build MLE members for bot.')
+    @commands.command(name='buildmembers', description='Build MLE members for the local franchise.\n\tThis uses local roles, not sprocket.')
     @has_gm_roles()
     @is_admin_channel()
     async def buildmembers(self, ctx: discord.ext.commands.Context):
         await self.bot.franchise.rebuild()
         await ctx.reply('Userbase has been successfully rebuilt!')
 
-    @commands.command(name='clearchannel', description='Clear channel messages. Include amt of messages to delete, max is 100. (e.g. ub.clearchannel 55)')
+    @commands.command(name='clearchannel', description='Clear channel messages. Include amt of messages to delete.\t\n Max is 100. (e.g. ub.clearchannel 55)')
     @has_gm_roles()
     async def clearchannel(self, ctx: discord.ext.commands.Context, count: int):
         await channels.clear_channel_messages(ctx.channel, count)
 
-    @commands.command(name='lookup', description='Lookup player by MLE name provided. This is CASE-SENSITIVE!\n(e.g. ub.lookup irox)')
+    @commands.command(name='lookup', description='Lookup player by MLE name provided.\n\tThis is CASE-SENSITIVE! (e.g. ub.lookup irox)')
     @has_captain_roles()
     @is_admin_channel()
     async def lookup(self,
@@ -99,6 +103,11 @@ class MLECommands(commands.Cog):
             await ctx.reply('sprocket player not found in sprocket data')
             return
 
+        tracker_player = next(
+            (x for x in self.bot.sprocket.data['sprocket_trackers'] if x['mleid'] == mle_player['mle_id']), None)
+        if not tracker_player:
+            await ctx.reply('player tracker info not found in sprocket data')
+
         embed = discord.Embed(color=self.bot.default_embed_color, title=f'**{" ".join(mle_name)} Quick Info**',
                               description='Quick info gathered by MLE docs\n')
         embed.add_field(name='`MLE Name`', value=mle_player['name'], inline=True)
@@ -108,6 +117,8 @@ class MLECommands(commands.Cog):
         embed.add_field(name='Scrim Points', value=sprocket_player['current_scrim_points'], inline=True)
         embed.add_field(name='Eligible?', value="Yes" if sprocket_player['current_scrim_points'] >= 30 else "No", inline=True)
         embed.add_field(name='Role', value=sprocket_player['slot'], inline=True)
+        if tracker_player:
+            embed.add_field(name='**Tracker Link**', value=tracker_player['tracker'], inline=False)
         await ctx.send(embed=embed)
 
     @commands.command(name='quickinfo', description='Get quick information about yourself.')
@@ -120,11 +131,12 @@ class MLECommands(commands.Cog):
     @has_gm_roles()
     @is_admin_channel()
     async def runroster(self, ctx: discord.ext.commands.Context):
+        await ctx.reply('Working on it...')
         if await self.bot.roster.post_roster():
             await ctx.reply('Roster posted successfully!')
 
     @commands.command(name='seasonstats',
-                      description='Beta - Get season stats for a specific league. Include league name.\n(e.g. ub.seasonstats master). Naming convention will be updated soon - Beta')
+                      description='Beta - Get season stats for a specific league.\n\tInclude league name. (e.g. ub.seasonstats master).\n\tNaming convention will be updated soon - Beta')
     @has_captain_roles()
     @is_admin_channel()
     async def seasonstats(self,
@@ -145,7 +157,7 @@ class MLECommands(commands.Cog):
                                     get_league_text(_team.league),
                                     _team.players)
 
-    @commands.command(name='teameligibility', description='Show team eligibility. Include league after command.\n(e.g. ub.teameligibility fl)')
+    @commands.command(name='teameligibility', description='Show team eligibility. Include league after command.\n\t(e.g. ub.teameligibility fl)')
     @has_captain_roles()
     @is_admin_channel()
     async def teameligibility(self,
@@ -175,13 +187,77 @@ class MLECommands(commands.Cog):
             await ctx.reply('An error has occurred.')
 
         embed = self.bot.default_embed(f'{MLEBot.team.get_league_text(_league_enum)} {self.bot.franchise.franchise_name} Eligibility Information')
-        embed.add_field(name=f'{"Role".ljust(12)}  {"name".ljust(30)} {"sal".ljust(14)} {"id".ljust(8)} {"scrim pts"}    {"eligible?"}',
-                        value='\n'.join([f'**`{p.role.ljust(7)}`**  `{str(p.mle_name.ljust(14)) if p.mle_name else "N/A?".ljust(14)}` `{str(p.salary).ljust(6) if p.salary else "N/A?".ljust(6)}` `{p.mle_id.__str__().ljust(8) if p.mle_id else "N/A?".ljust(8)}` `{p.scrim_points.__str__().ljust(8)}` `{"Yes" if p.eligible else "No"}`' for p in _players]),
-                        inline=False)
         if self.bot.server_icon:
             embed.set_thumbnail(url=self.bot.get_emoji(self.bot.server_icon).url)
+
+        ljust_limit = 8
+
+        for _p in [_x for _x in _players if _x.role != 'NONE']:
+            embed.add_field(name=f"**{_p.mle_name}**",
+                            value=f"`{'Role:'.ljust(ljust_limit)}` {_p.role}\n"
+                                  f"`{'Salary:'.ljust(ljust_limit)}` {_p.salary}\n"
+                                  f"`{'Points:'.ljust(ljust_limit)}` {_p.scrim_points.__str__()}\n"
+                                  f"`{'Until:'.ljust(ljust_limit)}` ~TBD~",
+                            inline=True)
+
+        # embed.add_field(name=f'{"Role".ljust(12)}  {"name".ljust(30)} {"sal".ljust(14)} {"id".ljust(8)} {"scrim pts"}    {"eligible?"}',
+        #                 value='\n'.join([f'**`{p.role.ljust(7)}`**  `{str(p.mle_name.ljust(14)) if p.mle_name else "N/A?".ljust(14)}` `{str(p.salary).ljust(6) if p.salary else "N/A?".ljust(6)}` `{p.mle_id.__str__().ljust(8) if p.mle_id else "N/A?".ljust(8)}` `{p.scrim_points.__str__().ljust(8)}` `{"Yes" if p.eligible else "No"}`' for p in _players]),
+        #                 inline=False)
+
         await ctx.send(embed=embed)
 
+    @commands.command(name='teaminfo', description='Get information about a team from the league!\n\tInclude team after command. (e.g. ub.teaminfo sabres)')
+    @is_public_channel()
+    async def teaminfo(self,
+                       ctx: discord.ext.commands.Context,
+                       team: str):
+        if not team:
+            await ctx.reply('You must provide a team when running this command! (e.g. ub.teaminfo ->Sabres<-"')
+            return
+        _team = next((x for x in self.bot.sprocket.data['sprocket_teams'] if x['name'].lower() == team.lower()), None)
+        if not _team:
+            await ctx.reply(f'Could not find team {team} in sprocket data base!\nPlease try again!')
+            return
+        embed = self.bot.default_embed(f"{_team['name']} Roster")
+        embed.set_thumbnail(url=_team['logo_img_link'])
+
+        _team_players = [x for x in self.bot.sprocket.data['sprocket_players'] if x['franchise'] == _team['name']]
+        if not _team_players:
+            await ctx.reply('Could not find players for franchise!')
+            return
+
+        _pl_players = [x for x in _team_players if x['skill_group'] == 'Premier League']
+        _ml_players = [x for x in _team_players if x['skill_group'] == 'Master League']
+        _cl_players = [x for x in _team_players if x['skill_group'] == 'Champion League']
+        _al_players = [x for x in _team_players if x['skill_group'] == 'Academy League']
+        _fl_players = [x for x in _team_players if x['skill_group'] == 'Foundation League']
+
+        MLECommands.__team_info_league__(sorted(_pl_players, key=lambda _p: _p['slot']),
+                                         embed,
+                                         'Premier',
+                                         SALARY_CAP_PL)
+
+        MLECommands.__team_info_league__(sorted(_ml_players, key=lambda _p: _p['slot']),
+                                         embed,
+                                         'Master',
+                                         SALARY_CAP_ML)
+
+        MLECommands.__team_info_league__(sorted(_cl_players, key=lambda _p: _p['slot']),
+                                         embed,
+                                         'Champion',
+                                         SALARY_CAP_CL)
+
+        MLECommands.__team_info_league__(sorted(_al_players, key=lambda _p: _p['slot']),
+                                         embed,
+                                         'Academy',
+                                         SALARY_CAP_AL)
+
+        MLECommands.__team_info_league__(sorted(_fl_players, key=lambda _p: _p['slot']),
+                                         embed,
+                                         'Foundation',
+                                         SALARY_CAP_FL)
+
+        await ctx.send(embed=embed)
 
     @commands.command(name='updatesprocket',
                       description='Update internal information by probing sprocket for new data.')
@@ -216,3 +292,17 @@ class MLECommands(commands.Cog):
             for role in after.roles:
                 if role in MLEBot.roles.FRANCHISE_ROLES:
                     self.bot.roster.run_req = True
+
+    @staticmethod
+    def __team_info_league__(players: [],
+                             embed: discord.Embed,
+                             league_name: str,
+                             salary_cap: float):
+        if players:
+            top_sals = sorted(players, key=lambda p: p['salary'])
+            sal_ceiling = 0.0
+            for i in range(5):
+                sal_ceiling += top_sals[i]['salary']
+            embed.add_field(name=f'**`[{sal_ceiling} / {salary_cap}]` {league_name}**',
+                            value='\n'.join([f"`{_p['slot'].removeprefix('PLAYER')} | {_p['salary']} | {_p['name']}`" for _p in players if _p['slot'] != 'NONE']),
+                            inline=False)

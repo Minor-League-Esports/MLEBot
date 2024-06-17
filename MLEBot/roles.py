@@ -11,7 +11,6 @@ from MLEBot.enums import LeagueEnum
 # non-local imports #
 import copy
 import discord
-import dotenv
 import os
 
 """ Constants
@@ -50,23 +49,24 @@ Waivers = "Waivers"
 Wizards = "Wizards"
 Wolves = "Wolves"
 SOCIAL_MEDIA = 'Social Media'
-dotenv.load_dotenv('.env')
-FRANCHISE_MANAGER = os.getenv('ROLE_FM')
-GENERAL_MANAGER_RL = os.getenv('ROLE_GM_RL')
-GENERAL_MANAGER_TM = os.getenv('ROLE_GM_TM')
-ASSISTANT_GENERAL_MANAGER_RL = os.getenv('ROLE_AGM_RL')
-ASSISTANT_GENERAL_MANAGER_TM = os.getenv('ROLE_AGM_TM')
-CAPTAIN = os.getenv('ROLE_CAPTAIN_RL')
-PREMIER_LEAGUE: str = os.getenv('ROLE_PL')
-MASTER_LEAGUE = os.getenv('ROLE_ML')
-CHAMPION_LEAGUE = os.getenv('ROLE_CL')
-ACADEMY_LEAGUE = os.getenv('ROLE_AL')
-FOUNDATION_LEAGUE = os.getenv('ROLE_FL')
-ROCKET_LEAGUE = 'Rocket League'
-PR_SUPPORT = 'PR Support'
-FA = 'Free Agent'
-FP = 'Former Player'
-Pend = 'Pending FA'
+
+# dotenv.load_dotenv('.env')
+FRANCHISE_MANAGER = None
+GENERAL_MANAGER_RL = None
+GENERAL_MANAGER_TM = None
+ASSISTANT_GENERAL_MANAGER_RL = None
+ASSISTANT_GENERAL_MANAGER_TM = None
+CAPTAIN = None
+PREMIER_LEAGUE = None
+MASTER_LEAGUE = None
+CHAMPION_LEAGUE = None
+ACADEMY_LEAGUE = None
+FOUNDATION_LEAGUE = None
+ROCKET_LEAGUE = None
+PR_SUPPORT = None
+FA = None
+FP = None
+Pend = None
 
 ALL_MLE_ROLES = [
     Aviators,
@@ -154,6 +154,20 @@ def init(guild: discord.Guild):
     global academy
     global foundation
     global FRANCHISE_ROLES, GENERAL_MGMT_ROLES, CAPTAIN_ROLES
+    global FRANCHISE_MANAGER, GENERAL_MANAGER_RL, GENERAL_MANAGER_TM, ASSISTANT_GENERAL_MANAGER_RL, ASSISTANT_GENERAL_MANAGER_TM
+    global CAPTAIN, PREMIER_LEAGUE, MASTER_LEAGUE, CHAMPION_LEAGUE, ACADEMY_LEAGUE, FOUNDATION_LEAGUE
+
+    FRANCHISE_MANAGER = os.getenv('ROLE_FM')
+    GENERAL_MANAGER_RL = os.getenv('ROLE_GM_RL')
+    GENERAL_MANAGER_TM = os.getenv('ROLE_GM_TM')
+    ASSISTANT_GENERAL_MANAGER_RL = os.getenv('ROLE_AGM_RL')
+    ASSISTANT_GENERAL_MANAGER_TM = os.getenv('ROLE_AGM_TM')
+    CAPTAIN = os.getenv('ROLE_CAPTAIN_RL')
+    PREMIER_LEAGUE = os.getenv('ROLE_PL')
+    MASTER_LEAGUE = os.getenv('ROLE_ML')
+    CHAMPION_LEAGUE = os.getenv('ROLE_CL')
+    ACADEMY_LEAGUE = os.getenv('ROLE_AL')
+    FOUNDATION_LEAGUE = os.getenv('ROLE_FL')
 
     social_media = get_role_by_name(guild, SOCIAL_MEDIA)
     franchise_manager = get_role_by_name(guild, FRANCHISE_MANAGER)

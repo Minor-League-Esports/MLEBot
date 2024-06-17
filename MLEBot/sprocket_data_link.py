@@ -4,9 +4,6 @@
 # Purpose: Individualized sprocket_data link object for sprocket database
 # Version 1.0.2
 """
-
-# local imports #
-
 # non-local imports #
 import asyncio
 import datetime

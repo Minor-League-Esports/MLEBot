@@ -2,7 +2,9 @@
 """ Minor League E-Sports Franchise
 # Author: irox_rl
 # Purpose: General Functions of a League Franchise
-# Version 1.0.4
+# Version 1.0.6
+#
+# v1.0.6 - include salary caps until sprocket does.
 """
 
 # local imports #
@@ -14,6 +16,13 @@ from MLEBot.team import Team
 import discord
 from discord.ext import commands
 import os
+
+# constants
+SALARY_CAP_PL = 95.0
+SALARY_CAP_ML = 82.0
+SALARY_CAP_CL = 69.5
+SALARY_CAP_AL = 57.5
+SALARY_CAP_FL = 39.5
 
 
 class Franchise:

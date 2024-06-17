@@ -1,7 +1,9 @@
 """ Minor League E-Sports Bot
 # Author: irox_rl
 # Purpose: General Functions of a League Franchise summarized in bot fashion!
-# Version 1.0.2
+# Version 1.0.6
+#
+# v1.0.6 - update for multiple case-types of command-prefix
 """
 
 from PyDiscoBot import Bot
@@ -169,7 +171,7 @@ if __name__ == '__main__':
     # noinspection PyDunderSlots
     intents.messages = True
 
-    bot = MLEBot('ub.',
+    bot = MLEBot(['ub.', 'Ub.', 'UB.'],
                  intents,
                  [Commands, MLECommands])
 

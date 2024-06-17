@@ -15,39 +15,16 @@ import MLEBot.roles
 import datetime
 import discord
 from discord.ext import commands
-import dotenv
 import os
 import pickle
 from typing import Callable
 
-try:
-    IMG_STAFF = os.getenv('IMG_STAFF')
-except KeyError:
-    IMG_STAFF = None
-
-try:
-    IMG_PREMIER = os.getenv('IMG_PREMIER')
-except KeyError:
-    IMG_PREMIER = None
-
-try:
-    IMG_MASTER = os.getenv('IMG_MASTER')
-except KeyError:
-    IMG_MASTER = None
-try:
-    IMG_CHAMPION = os.getenv('IMG_CHAMPION')
-except KeyError:
-    IMG_CHAMPION = None
-
-try:
-    IMG_ACADEMY = os.getenv('IMG_ACADEMY')
-except KeyError:
-    IMG_ACADEMY = None
-
-try:
-    IMG_FOUNDATION = os.getenv('IMG_FOUNDATION')
-except KeyError:
-    IMG_FOUNDATION = None
+IMG_STAFF = None
+IMG_PREMIER = None
+IMG_MASTER = None
+IMG_CHAMPION = None
+IMG_ACADEMY = None
+IMG_FOUNDATION = None
 
 
 class Task_Roster:
@@ -185,6 +162,39 @@ class Task_Roster:
         return embed
 
     @staticmethod
+    def __load_imgs__():
+        global IMG_STAFF, IMG_PREMIER, IMG_MASTER, IMG_CHAMPION, IMG_ACADEMY, IMG_FOUNDATION
+
+        try:
+            IMG_STAFF = os.getenv('IMG_STAFF')
+        except KeyError:
+            IMG_STAFF = None
+
+        try:
+            IMG_PREMIER = os.getenv('IMG_PREMIER')
+        except KeyError:
+            IMG_PREMIER = None
+
+        try:
+            IMG_MASTER = os.getenv('IMG_MASTER')
+        except KeyError:
+            IMG_MASTER = None
+        try:
+            IMG_CHAMPION = os.getenv('IMG_CHAMPION')
+        except KeyError:
+            IMG_CHAMPION = None
+
+        try:
+            IMG_ACADEMY = os.getenv('IMG_ACADEMY')
+        except KeyError:
+            IMG_ACADEMY = None
+
+        try:
+            IMG_FOUNDATION = os.getenv('IMG_FOUNDATION')
+        except KeyError:
+            IMG_FOUNDATION = None
+
+    @staticmethod
     def __strobe_league_members__(league_members) -> []:
         max_player_cnt = 7
         line = []
@@ -200,6 +210,7 @@ class Task_Roster:
     async def load(self):
         if not self.bot.roster_channel:
             return
+        Task_Roster.__load_imgs__()
         self.loaded = True
         try:
             with (open(self._file_name, 'rb') as f):  # Open save file

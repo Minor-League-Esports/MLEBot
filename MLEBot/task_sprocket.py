@@ -12,7 +12,6 @@ from MLEBot.sprocket_data_link import SprocketDataLink
 
 # non-local imports #
 import datetime
-import discord
 import pickle
 
 
@@ -35,6 +34,8 @@ class Task_Sprocket:
             "https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/schedules/match_groups")
         self._matches_link = SprocketDataLink(
             "https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/schedules/matches")
+        self._trackers_link = SprocketDataLink(
+            "https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/trackers")
 
         self.on_updated = []
 
@@ -52,7 +53,8 @@ class Task_Sprocket:
                 self._teams_link.last_time_updated and
                 self._fixtures_link.last_time_updated and
                 self._match_groups_link.last_time_updated and
-                self._matches_link.last_time_updated):
+                self._matches_link.last_time_updated and
+                self._trackers_link.last_time_updated):
             return True
         return False
 
@@ -66,6 +68,7 @@ class Task_Sprocket:
                 'sprocket_fixtures': self._fixtures_link.json_data,
                 'sprocket_match_groups': self._match_groups_link.json_data,
                 'sprocket_matches': self._matches_link.json_data,
+                'sprocket_trackers': self._trackers_link.json_data,
                 }
 
     @property
@@ -87,6 +90,10 @@ class Task_Sprocket:
     @property
     def teams_link(self):
         return self._teams_link
+
+    @property
+    def trackers_link(self):
+        return self._trackers_link
 
     @property
     def fixtures_link(self):
@@ -137,6 +144,7 @@ class Task_Sprocket:
         self._fixtures_link.updated_flag = False
         self._match_groups_link.updated_flag = False
         self._matches_link.updated_flag = False
+        self.trackers_link.updated_flag = False
 
     def load(self):
         try:
@@ -150,8 +158,9 @@ class Task_Sprocket:
                 self._fixtures_link.decompress(data[5])
                 self._match_groups_link.decompress(data[6])
                 self._matches_link.decompress(data[7])
-                self._last_time_ran = data[8]['last_time_ran']
-                self._next_run_time = data[8]['next_run_time']
+                self._trackers_link.decompress(data[8])
+                self._last_time_ran = data[9]['last_time_ran']
+                self._next_run_time = data[9]['next_run_time']
         except (KeyError, FileNotFoundError, EOFError) as e:
             self._next_run_time = datetime.datetime.now()
         finally:
@@ -172,6 +181,7 @@ class Task_Sprocket:
             await self._fixtures_link.data()
             await self._match_groups_link.data()
             await self._matches_link.data()
+            await self._trackers_link.data()
         else:
             return
         self.__get_next_run_time__()
@@ -186,6 +196,7 @@ class Task_Sprocket:
                 'sprocket_fixtures': self._fixtures_link.json_data,
                 'sprocket_match_groups': self._match_groups_link.json_data,
                 'sprocket_matches': self._matches_link.json_data,
+                'sprocket_trackers': self._trackers_link.json_data,
             })
         await err('sprocket server links updated.')
 
@@ -199,6 +210,7 @@ class Task_Sprocket:
                          self._fixtures_link.compress(),
                          self._match_groups_link.compress(),
                          self._matches_link.compress(),
+                         self._trackers_link.compress(),
                          {
                              'last_time_ran': self._last_time_ran,
                              'next_run_time': self._next_run_time,
