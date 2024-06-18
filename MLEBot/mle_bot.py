@@ -12,8 +12,10 @@ from PyDiscoBot.commands import Commands
 
 # local imports #
 from MLEBot.franchise import Franchise
+from MLEBot.member import has_role
 from MLEBot.mle_commands import MLECommands
 from MLEBot.roles import init as init_roles
+from MLEBot.roles import GENERAL_MGMT_ROLES, CAPTAIN_ROLES
 from MLEBot.task_roster import Task_Roster
 from MLEBot.task_sprocket import Task_Sprocket
 
@@ -25,6 +27,8 @@ import os
 
 
 class MLEBot(Bot):
+    mle_logo_url = "https://images-ext-1.discordapp.net/external/8g0PflayqZyQZe8dqTD_wYGPcCpucRWAsnIjV4amZhc/https/i.imgur.com/6anH1sI.png?format=webp&quality=lossless&width=619&height=619"
+
     def __init__(self,
                  command_prefix: str | None,
                  bot_intents: discord.Intents | None,
@@ -44,7 +48,7 @@ class MLEBot(Bot):
                                     self._guild,
                                     disable_premier_league=True if (os.getenv('PREMIER_CHANNEL') == '') else False,
                                     disable_foundation_league=True if (
-                                                os.getenv('FOUNDATION_CHANNEL') == '') else False)
+                                            os.getenv('FOUNDATION_CHANNEL') == '') else False)
 
     @property
     def academy_channel(self) -> discord.TextChannel | None:
@@ -93,6 +97,19 @@ class MLEBot(Bot):
     @property
     def sprocket(self) -> Task_Sprocket | None:
         return self._sprocket
+
+    async def get_help_cmds_by_user(self,
+                                    ctx: discord.ext.commands.Context) -> [disco_commands.command]:
+        user_cmds = [cmd for cmd in self.commands]
+        for cmd in self.commands:
+            for check in cmd.checks:
+                try:
+                    can_run = await check(ctx)
+                    if not can_run:
+                        user_cmds.remove(cmd)
+                except disco_commands.CheckFailure:
+                    user_cmds.remove(cmd)
+        return user_cmds
 
     async def on_ready(self,
                        suppress_task=False) -> None:

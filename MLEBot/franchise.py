@@ -162,13 +162,6 @@ class Franchise:
         self.guild = guild
         await self.rebuild()
 
-    async def post_player_quick_info(self,
-                                     player: discord.Member,
-                                     ctx: discord.ext.commands.Context):
-        _member = Member(player)
-        await _member.update(self.bot.sprocket.data)
-        await _member.post_quick_info(ctx)
-
     async def post_season_stats_html(self,
                                      league: str,
                                      ctx: discord.ext.commands.Context | discord.TextChannel | None = None):
