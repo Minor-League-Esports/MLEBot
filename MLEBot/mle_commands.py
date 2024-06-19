@@ -6,6 +6,8 @@
 #
 # v1.0.6 - include salary caps, update formatting for teamlookup and teameligibility
 #           add teaminfo command
+#           add cog check for bot loaded status
+#           other minor updates.
 """
 import PyDiscoBot
 from PyDiscoBot import channels
@@ -26,6 +28,8 @@ from discord.ext import commands
 
 def has_gm_roles():
     async def predicate(ctx: discord.ext.commands.Context):
+        if isinstance(ctx.channel, discord.DMChannel):
+            raise PyDiscoBot.IllegalChannel("This channel does not support that.")
         if not has_role(ctx.author,
                         MLEBot.roles.GENERAL_MGMT_ROLES):
             raise PyDiscoBot.InsufficientPrivilege("You do not have sufficient privileges.")
@@ -36,6 +40,8 @@ def has_gm_roles():
 
 def has_captain_roles():
     async def predicate(ctx: discord.ext.commands.Context):
+        if isinstance(ctx.channel, discord.DMChannel):
+            raise PyDiscoBot.IllegalChannel("This channel does not support that.")
         if not has_role(ctx.author,
                         MLEBot.roles.CAPTAIN_ROLES + MLEBot.roles.GENERAL_MGMT_ROLES):
             raise PyDiscoBot.InsufficientPrivilege("You do not have sufficient privileges.")
@@ -46,6 +52,8 @@ def has_captain_roles():
 
 def is_admin_channel():
     async def predicate(ctx: discord.ext.commands.Context):
+        if isinstance(ctx.channel, discord.DMChannel):
+            raise PyDiscoBot.IllegalChannel("This channel does not support that.")
         chnl = await ctx.cog.get_admin_cmds_channel()
         if ctx.channel is chnl:
             return True
@@ -56,6 +64,8 @@ def is_admin_channel():
 
 def is_public_channel():
     async def predicate(ctx: discord.ext.commands.Context):
+        if isinstance(ctx.channel, discord.DMChannel):
+            raise PyDiscoBot.IllegalChannel("This channel does not support that.")
         admin_chnl = await ctx.cog.get_admin_cmds_channel()
         chnl = await ctx.cog.get_public_cmds_channel()
         if ctx.channel is chnl or ctx.channel is admin_chnl:
@@ -75,6 +85,15 @@ class MLECommands(commands.Cog):
 
     async def get_public_cmds_channel(self):
         return self.bot.public_commands_channel
+
+    def bot_loaded(self) -> bool:
+        return self.bot.loaded
+
+    async def cog_check(self,
+                        ctx: discord.ext.commands.Context):
+        if not self.bot_loaded():
+            raise PyDiscoBot.BotNotLoaded('Bot is not yet loaded. Please try again.')
+        return True
 
     @commands.command(name='buildmembers',
                       description='Build MLE members for the local franchise.\nThis uses local roles, not sprocket.')
@@ -97,8 +116,7 @@ class MLECommands(commands.Cog):
 
     @commands.command(name='lookup',
                       description='Lookup player by MLE name provided.\nThis is CASE-SENSITIVE! (e.g. ub.lookup irox)\nTo lookup yourself, just type {ub.lookup}')
-    @has_captain_roles()
-    @is_admin_channel()
+    @is_public_channel()
     async def lookup(self,
                      ctx: discord.ext.commands.Context,
                      *mle_name):
@@ -162,18 +180,20 @@ class MLECommands(commands.Cog):
                     query_filter: str):
         _league_enum = get_league_enum_by_short_text(league_filter)
         if not _league_enum:
-            await self.bot.send_notification(ctx,
-                                             'League not found. Please enter a valid league. (e.g. ub.query fl [query filter])',
-                                             True)
+            return await self.bot.send_notification(ctx,
+                                                    'League not found. Please enter a valid league. (e.g. ub.query fl [query filter])',
+                                                    True)
 
-        valid_queries = ['FA', 'Waivers', 'RFA']
-        if query_filter not in valid_queries:
-            await self.bot.send_notification(ctx,
-                                             f'`{query_filter}` is an invalid query. Please try again.',
-                                             True)
+        valid_queries = ['fa', 'waivers', 'rfa', 'pend']
+        if query_filter.lower() not in valid_queries:
+            return await self.bot.send_notification(ctx,
+                                                    f'`{query_filter}` is an invalid query. Please try again.',
+                                                    True)
 
         data = self.bot.sprocket.data
-        _players = [x for x in data['sprocket_players'] if x['franchise'] == query_filter and x['skill_group'] == _league_enum.name.replace('_', ' ')]
+        _players = [x for x in data['sprocket_players'] if
+                    x['franchise'].lower() == query_filter.lower() and x['skill_group'] == _league_enum.name.replace(
+                        '_', ' ')]
 
         if len(_players) == 0:
             emb: discord.Embed = self.bot.default_embed(f'**Filtered Players**\n\n',
@@ -195,9 +215,11 @@ class MLECommands(commands.Cog):
 
             elements_per_page = 15
             offset = (page - 1) * elements_per_page
-            emb.add_field(name=f'**MLE Players**',
+            emb.add_field(name=f'**Sal      | Points |    Name**',
                           value='\n'.join(
-                              [f"`{_p['salary']} | {_p['name']}`" for _p in _players[offset:offset + elements_per_page]]),
+                              [
+                                  f"`{_p['salary'].__str__().ljust(4)} | {_p['current_scrim_points'].__str__().ljust(4)} | {_p['name']}`"
+                                  for _p in _players[offset:offset + elements_per_page]]),
                           inline=False)
             total_pages = Pagination.compute_total_pages(len(_players),
                                                          elements_per_page)
@@ -231,7 +253,7 @@ class MLECommands(commands.Cog):
     @commands.command(name='seasonstats',
                       description='Beta - Get season stats for a specific league.\n\tInclude league name. (e.g. ub.seasonstats master).\n\tNaming convention will be updated soon - Beta')
     @has_captain_roles()
-    @is_admin_channel()
+    @is_public_channel()
     async def seasonstats(self,
                           ctx: discord.ext.commands.Context,
                           league: str):
@@ -381,7 +403,7 @@ class MLECommands(commands.Cog):
 
     @commands.command(name='updatesprocket',
                       description='Update internal information by probing sprocket for new data.')
-    @has_gm_roles()
+    @has_captain_roles()
     @is_admin_channel()
     async def updatesprocket(self, ctx: discord.ext.commands.Context):
         await self.bot.send_notification(ctx,
@@ -425,7 +447,9 @@ class MLECommands(commands.Cog):
                              league_name: str,
                              salary_cap: float):
         if players:
-            top_sals = sorted(players, key=lambda p: p['salary'])
+            top_sals = sorted(players,
+                              key=lambda p: p['salary'],
+                              reverse=True)
             sal_ceiling = 0.0
             range_length = 5 if len(players) >= 5 else len(players)
             for i in range(range_length):

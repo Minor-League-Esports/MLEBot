@@ -12,10 +12,8 @@ from PyDiscoBot.commands import Commands
 
 # local imports #
 from MLEBot.franchise import Franchise
-from MLEBot.member import has_role
 from MLEBot.mle_commands import MLECommands
 from MLEBot.roles import init as init_roles
-from MLEBot.roles import GENERAL_MGMT_ROLES, CAPTAIN_ROLES
 from MLEBot.task_roster import Task_Roster
 from MLEBot.task_sprocket import Task_Sprocket
 
@@ -73,6 +71,13 @@ class MLEBot(Bot):
         return self._franchise
 
     @property
+    def loaded(self) -> bool:
+        """ loaded status for bot\n
+        override to include external processes that need to load when initiating
+        """
+        return super().loaded and self.sprocket.all_links_loaded and self.roster.loaded
+
+    @property
     def master_channel(self) -> discord.TextChannel | None:
         """ return the master channel
                                 """
@@ -107,8 +112,12 @@ class MLEBot(Bot):
                     can_run = await check(ctx)
                     if not can_run:
                         user_cmds.remove(cmd)
+                        break
                 except disco_commands.CheckFailure:
                     user_cmds.remove(cmd)
+                    break
+                except AttributeError:  # in this instance, a predicate could not be checked. It does not exist (part of the base bot)
+                    break
         return user_cmds
 
     async def on_ready(self,
@@ -120,6 +129,8 @@ class MLEBot(Bot):
         """ do not initialize more than once
         """
         if self._initialized:
+            await self.change_presence(
+                activity=discord.Activity(type=discord.ActivityType.playing, name='🐶 Bark Simulator 🐕'))
             return
         await super().on_ready(suppress_task)
         init_roles(self._guild)
@@ -168,6 +179,8 @@ class MLEBot(Bot):
                                                               self._guild) if foundation_channel_token else None
 
         await self.franchise.init(self._guild)
+
+        await self.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name='🐶 Bark Simulator 🐕'))
 
     async def on_task(self) -> None:
         await super().on_task()

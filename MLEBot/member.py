@@ -13,10 +13,6 @@ import MLEBot.roles
 import discord
 from discord.ext import commands
 
-# constants
-EMOTE_CHECK_GREEN = ':white_check_mark:'
-EMOTE_X_RED = ':x:'
-
 
 class Member:
     """ Minor League E-Sports Member
