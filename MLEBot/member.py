@@ -6,8 +6,9 @@
 """
 
 # local imports #
-from MLEBot.enums import LeagueEnum
-import MLEBot.roles
+# from MLEBot.enums import LeagueEnum
+from enums import LeagueEnum
+import roles
 
 # non-local imports #
 import discord
@@ -17,13 +18,19 @@ from discord.ext import commands
 class Member:
     """ Minor League E-Sports Member
     """
+
     def __init__(self,
-                 discord_member: discord.Member | None):
+                 discord_member: discord.Member | None,
+                 league: LeagueEnum | None = None):
         """ Initiate member with reference to parent bot and discord.Member
             Other attributes are initialized to None or equivalent
             Members support saving and loading """
         self.discord_member: discord.Member = discord_member
-        self.league: LeagueEnum | None = self.__get_league_role__(self.discord_member) if self.discord_member else None
+        if not league:
+            self.league: LeagueEnum | None = self.__get_league_role__(
+                self.discord_member) if self.discord_member else None
+        else:
+            self.league: LeagueEnum = league
         self.mle_name: str | None = None
         self.mle_id = None
         self.mle_player_id = None
@@ -63,19 +70,19 @@ class Member:
         """ Returns league enumeration if user has associated role
             else returns None """
         for role in member.roles:
-            if role.name == MLEBot.roles.PREMIER_LEAGUE:
+            if role.name == roles.PREMIER_LEAGUE:
                 return LeagueEnum.Premier_League
-            if role.name == MLEBot.roles.MASTER_LEAGUE:
+            if role.name == roles.MASTER_LEAGUE:
                 return LeagueEnum.Master_League
-            if role.name == MLEBot.roles.CHAMPION_LEAGUE:
+            if role.name == roles.CHAMPION_LEAGUE:
                 return LeagueEnum.Champion_League
-            if role.name == MLEBot.roles.ACADEMY_LEAGUE:
+            if role.name == roles.ACADEMY_LEAGUE:
                 return LeagueEnum.Academy_League
-            if role.name == MLEBot.roles.FOUNDATION_LEAGUE:
+            if role.name == roles.FOUNDATION_LEAGUE:
                 return LeagueEnum.Foundation_League
 
-    async def __update_from_sprocket_players__(self,
-                                               sprocket_players: {}) -> None:
+    def __update_from_sprocket_players__(self,
+                                         sprocket_players: {}) -> None:
         """ Update sprocket_id from sprocket_players.json data from sprocket database """
         if not sprocket_players:
             return
@@ -88,8 +95,8 @@ class Member:
         self.scrim_points = player['current_scrim_points']
         self.eligible = True if self.scrim_points >= 30 else False
 
-    async def __update_from_sprocket_player_stats__(self,
-                                                    sprocket_player_stats):
+    def __update_from_sprocket_player_stats__(self,
+                                              sprocket_player_stats):
         if not sprocket_player_stats:
             return
         player_stats = next((x for x in sprocket_player_stats if x['member_id'] == self.member_id), None)
@@ -106,8 +113,8 @@ class Member:
         self.goals_against = player_stats['goals_against']
         self.shots_against = player_stats['shots_against']
 
-    async def __update_from_members__(self,
-                                      sprocket_members: {}) -> None:
+    def __update_from_members__(self,
+                                sprocket_members: {}) -> None:
         if not sprocket_members:
             return
         member = next((x for x in sprocket_members if x['discord_id'] == self.discord_member.id.__str__()), None)
@@ -130,7 +137,8 @@ class Member:
         embed.add_field(name='Scrim Points', value=self.scrim_points, inline=True)
         embed.add_field(name='Eligible?', value=self.eligible, inline=True)
         embed.add_field(name='Role', value=self.role, inline=True)
-        embed.add_field(name='dpi', value=self.dpi, inline=True)  # This is disabled until sprocket gives out better data(?)
+        embed.add_field(name='dpi', value=self.dpi,
+                        inline=True)  # This is disabled until sprocket gives out better data(?)
         embed.add_field(name='opi', value=self.opi, inline=True)
         embed.add_field(name='goals', value=self.goals, inline=True)
         embed.add_field(name='saves', value=self.saves, inline=True)
@@ -141,12 +149,12 @@ class Member:
         embed.add_field(name='shots_against', value=self.shots_against, inline=True)
         await ctx.send(embed=embed)
 
-    async def update(self, sprocket_data: {}):
+    def update(self, sprocket_data: {}):
         if not sprocket_data:
             return
-        await self.__update_from_members__(sprocket_data['sprocket_members'])
-        await self.__update_from_sprocket_players__(sprocket_data['sprocket_players'])
-        await self.__update_from_sprocket_player_stats__(sprocket_data['sprocket_player_stats'])
+        self.__update_from_members__(sprocket_data['sprocket_members'])
+        self.__update_from_sprocket_players__(sprocket_data['sprocket_players'])
+        self.__update_from_sprocket_player_stats__(sprocket_data['sprocket_player_stats'])
         return self
 
 

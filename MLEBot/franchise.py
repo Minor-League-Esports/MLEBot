@@ -8,14 +8,12 @@
 """
 
 # local imports #
-from MLEBot.enums import *
-from MLEBot.member import Member
-from MLEBot.team import Team
+from enums import *
+from team import Team
 
 # non-local imports #
 import discord
 from discord.ext import commands
-import os
 
 # constants
 SALARY_CAP_PL = 95.0
@@ -33,8 +31,7 @@ class Franchise:
     def __init__(self,
                  master_bot,
                  guild: discord.Guild,
-                 disable_premier_league: bool = False,
-                 disable_foundation_league: bool = False) -> None:
+                 franchise_name: str) -> None:
         """ Initialize method\n
                     **param guild**: reference to guild this franchise belongs to\n
                     **param team_name**: string representation of this team's name (e.g. **'Sabres'**)\n
@@ -43,11 +40,10 @@ class Franchise:
                 """
         self.bot = master_bot
         self.guild = guild
-        self.franchise_name = os.getenv('TEAM_NAME')
+        self.franchise_name = franchise_name
         self.premier_league = Team(self.guild,
                                    self,
-                                   LeagueEnum.Premier_League) if not disable_premier_league else None
-        self.premier_disabled = True if self.premier_league is None else False
+                                   LeagueEnum.Premier_League)
         self.master_league = Team(self.guild,
                                   self,
                                   LeagueEnum.Master_League)
@@ -59,8 +55,10 @@ class Franchise:
                                    LeagueEnum.Academy_League)
         self.foundation_league = Team(self.guild,
                                       self,
-                                      LeagueEnum.Foundation_League) if not disable_foundation_league else None
-        self.foundation_disabled = True if self.foundation_league is None else False
+                                      LeagueEnum.Foundation_League)
+        self._sprocket_team: {} = None
+        self._sprocket_members: [{}] = []
+        self._sprocket_players: [{}] = []
 
     @property
     def all_members(self) -> [[],
@@ -74,6 +72,18 @@ class Franchise:
         for _team in self.teams:
             lst.extend(_team.players)
         return lst
+
+    @property
+    def sprocket_team(self):
+        return self._sprocket_team
+
+    @property
+    def sprocket_members(self):
+        return self._sprocket_members
+
+    @property
+    def sprocket_players(self):
+        return self._sprocket_players
 
     @property
     def teams(self) -> [Team]:
@@ -90,41 +100,15 @@ class Franchise:
             lst.append(self.foundation_league)
         return lst
 
-    def add_member(self,
-                   _member: Member) -> bool:
-        """ add member to this franchise. Will be delegated based on **member.league**\n
-                **param member**: MLE Member to be added to this franchise (welcome!)\n
-                **returns** delegated success returned from the team's add method
-                """
-        """ Match the league and return its' return 
-        """
-        match _member.league:
-            case LeagueEnum.Premier_League:
-                if not self.premier_disabled:
-                    return self.premier_league.add_member(_member)
-                else:
-                    return False
-            case LeagueEnum.Master_League:
-                return self.master_league.add_member(_member)
-            case LeagueEnum.Champion_League:
-                return self.champion_league.add_member(_member)
-            case LeagueEnum.Academy_League:
-                return self.academy_league.add_member(_member)
-            case LeagueEnum.Foundation_League:
-                if not self.foundation_disabled:
-                    return self.foundation_league.add_member(_member)
-                else:
-                    return False
-        return False
-
-    async def build(self) -> None:
-        """ build member-base from list of members\n
-                        **returns**: None
-                        """
-        for mem in self.guild.members:
-            league_member = Member(mem)
-            if league_member.league:
-                self.add_member(league_member)
+    def build_sprocket_data(self):
+        self._sprocket_team = next((x for x in self.bot.sprocket.data['sprocket_teams'] if self.franchise_name == x['name']), None)
+        self._sprocket_players = [x for x in self.bot.sprocket.data['sprocket_players'] if x['franchise'] == self.franchise_name]
+        self._sprocket_members = []
+        for _player in self.sprocket_players:
+            _mem = next(
+                (x for x in self.bot.sprocket.data['sprocket_members'] if x['member_id'] == _player['member_id']), None)
+            if _mem:
+                self._sprocket_members.append(_mem)
 
     async def get_team_eligibility(self,
                                    team: LeagueEnum):
@@ -139,11 +123,10 @@ class Franchise:
         elif team == LeagueEnum.Foundation_League and self.foundation_league:
             _players = await self.foundation_league.get_updated_players()
         else:
-            _players = None
+            return None
         return sorted(_players, key=lambda x: x.role)
 
-    async def init(self,
-                   guild: discord.Guild):
+    async def init(self):
         """ initialization method\n
         **`optional`param sprocket_delegate**: sprocket method delegate that we can append internally\n
         **`optional`param premier_channel**: channel to post quick info\n
@@ -157,9 +140,6 @@ class Franchise:
                 """
         """ assign datas locally
         """
-        if not guild:
-            raise KeyError('MLE Team needs to have a reference to its own guild')
-        self.guild = guild
         await self.rebuild()
 
     async def post_season_stats_html(self,
@@ -178,11 +158,14 @@ class Franchise:
     async def rebuild(self) -> None:
         """ rebuild franchise
         """
-        if not self.premier_disabled:
-            self.premier_league = Team(self.guild, self, LeagueEnum.Premier_League)
+        self.build_sprocket_data()
+        self.premier_league = Team(self.guild, self, LeagueEnum.Premier_League)
         self.master_league = Team(self.guild, self, LeagueEnum.Master_League)
         self.champion_league = Team(self.guild, self, LeagueEnum.Champion_League)
         self.academy_league = Team(self.guild, self, LeagueEnum.Academy_League)
-        if not self.foundation_disabled:
-            self.foundation_league = Team(self.guild, self, LeagueEnum.Foundation_League)
-        await self.build()
+        self.foundation_league = Team(self.guild, self, LeagueEnum.Foundation_League)
+        self.premier_league.build()
+        self.master_league.build()
+        self.champion_league.build()
+        self.academy_league.build()
+        self.foundation_league.build()

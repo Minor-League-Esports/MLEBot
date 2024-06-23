@@ -8,7 +8,7 @@
 from PyDiscoBot import err
 
 # local imports #
-from MLEBot.sprocket_data_link import SprocketDataLink
+from sprocket_data_link import SprocketDataLink
 
 # non-local imports #
 import datetime
@@ -161,9 +161,9 @@ class Task_Sprocket:
                 self._trackers_link.decompress(data[8])
                 self._last_time_ran = data[9]['last_time_ran']
                 self._next_run_time = data[9]['next_run_time']
+                self._loaded = True
         except (KeyError, FileNotFoundError, EOFError) as e:
             self._next_run_time = datetime.datetime.now()
-        finally:
             self._loaded = True
 
     def reset(self):

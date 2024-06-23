@@ -8,8 +8,8 @@
 from PyDiscoBot import channels, err
 
 # local imports #
-from MLEBot.member import get_members_by_role
-import MLEBot.roles
+from member import get_members_by_role
+import roles
 
 # non-local imports #
 import datetime
@@ -251,6 +251,7 @@ class Task_Roster:
         await self.post_roster()
 
     async def post_roster(self, ctx: discord.ext.commands.Context | discord.TextChannel | None = None) -> bool:
+        return False
         if ctx:
             context = ctx
         else:
@@ -295,6 +296,7 @@ class Task_Roster:
     async def run(self):
         if not self.loaded:
             await self.load()
+        return  # disable task until full integration, cmd still avail
         await self.__role_update__()
 
     def save(self):

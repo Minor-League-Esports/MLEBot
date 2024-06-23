@@ -6,7 +6,7 @@
 """
 
 # local imports #
-from MLEBot.enums import LeagueEnum
+from enums import LeagueEnum
 
 # non-local imports #
 import copy
@@ -118,6 +118,42 @@ ALL_MLE_ROLES = [
     FA,
     FP,
     Pend,
+]
+
+ALL_TEAMS = [
+    Aviators,
+    Bears,
+    Blizzard,
+    Bulls,
+    Comets,
+    Demolition,
+    Dodgers,
+    Ducks,
+    Eclipse,
+    Elite,
+    Express,
+    Flames,
+    Foxes,
+    Hawks,
+    Hive,
+    Hurricanes,
+    Jets,
+    Knights,
+    Lightning,
+    Outlaws,
+    Pandas,
+    Pirates,
+    Puffins,
+    Rhinos,
+    Sabres,
+    Shadow,
+    Sharks,
+    Spartans,
+    Spectre,
+    Tyrants,
+    Waivers,
+    Wizards,
+    Wolves,
 ]
 
 FRANCHISE_ROLES = []

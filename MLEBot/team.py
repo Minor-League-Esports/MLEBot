@@ -8,8 +8,8 @@
 from PyDiscoBot import channels, err
 
 # local imports #
-from MLEBot.member import Member
-from MLEBot.enums import LeagueEnum
+from member import Member
+from enums import LeagueEnum
 
 # non-local imports #
 import os
@@ -57,10 +57,20 @@ class Team:
         self.doubles_series_losses = 0
         self.doubles_wins = 0
         self.doubles_losses = 0
+        self._sprocket_players: [{}] = []
+        self._sprocket_members: [{}] = []
 
     @property
     def league_name(self) -> str:
-        return self.league.name
+        return self.league.name.replace('_', ' ')
+
+    @property
+    def sprocket_members(self):
+        return self._sprocket_members
+
+    @property
+    def sprocket_players(self):
+        return self._sprocket_players
 
     def __get_emote_by_id__(self, emoji_id: str) -> discord.Emoji | None:
         """ helper function to get guild emote by supplied ID\n
@@ -366,7 +376,7 @@ class Team:
                                                                                away_team_wk_13_logo=wk['13'][
                                                                                    'away_url'],
                                                                                score_wk_13=wk['13']['score'],
-                                                                               team_img=self.franchise.bot.get_emoji(self.franchise.bot.server_icon).url)
+                                                                               team_imgurl=self.franchise.bot.server_icon)
 
         hti.screenshot(html_str=html_string, css_file=r'team/html/TeamWeeklyStats.css',
                        save_as=f'{get_league_text(self.league)}weeklystats_{game_mode}.png')
@@ -496,7 +506,22 @@ class Team:
         """ Add the member
         """
         self.players.append(new_member)
+        new_member.update(self.franchise.bot.sprocket.data)
         return True
+
+    def build(self):
+        self._sprocket_players = [x for x in self.franchise.sprocket_players if x['skill_group'] == self.league_name]
+        self._sprocket_members = []
+        for _player in self._sprocket_players:
+            _mem = next((x for x in self.franchise.sprocket_members if x['member_id'] == _player['member_id']), None)
+            if _mem:
+                self._sprocket_members.append(_mem)
+                _guild_member = next((x for x in self.franchise.guild.members if x.id == int(_mem['discord_id'])), None)
+                if _guild_member:
+                    self.add_member(Member(_guild_member,
+                                           self.league))
+
+
 
     async def build_quick_info_channel(self,
                                        sprocket_data: {}) -> None:
@@ -569,7 +594,7 @@ class Team:
 
     async def get_updated_players(self) -> [Member]:
         for player in self.players:
-            await player.update(self.franchise.bot.sprocket.data)
+            player.update(self.franchise.bot.sprocket.data)
         return self.players
 
     def remove_member(self, _member: Member) -> bool:
