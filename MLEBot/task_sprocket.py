@@ -36,6 +36,8 @@ class Task_Sprocket:
             "https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/schedules/matches")
         self._trackers_link = SprocketDataLink(
             "https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/trackers")
+        self._role_usages_link = SprocketDataLink(
+            "https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/role_usages")
 
         self.on_updated = []
 
@@ -54,7 +56,8 @@ class Task_Sprocket:
                 self._fixtures_link.last_time_updated and
                 self._match_groups_link.last_time_updated and
                 self._matches_link.last_time_updated and
-                self._trackers_link.last_time_updated):
+                self._trackers_link.last_time_updated and
+                self._role_usages_link.last_time_updated):
             return True
         return False
 
@@ -69,6 +72,7 @@ class Task_Sprocket:
                 'sprocket_match_groups': self._match_groups_link.json_data,
                 'sprocket_matches': self._matches_link.json_data,
                 'sprocket_trackers': self._trackers_link.json_data,
+                'role_usages': self._role_usages_link.json_data,
                 }
 
     @property
@@ -82,6 +86,10 @@ class Task_Sprocket:
     @property
     def players_link(self):
         return self._players_link
+
+    @property
+    def role_usages_link(self):
+        return self._role_usages_link
 
     @property
     def scrim_stats_link(self):
@@ -109,9 +117,7 @@ class Task_Sprocket:
 
     @property
     def ready_to_update(self) -> bool:
-        if self._next_run_time <= datetime.datetime.now():
-            return True
-        return False
+        return self._next_run_time <= datetime.datetime.now()
 
     def __get_next_run_time__(self):
         self._last_time_ran = datetime.datetime.now()
@@ -135,17 +141,6 @@ class Task_Sprocket:
                                                                        seconds=(0 - self._last_time_ran.second), days=1)
         return
 
-    def __reset_link_flags__(self):
-        self._members_link.updated_flag = False
-        self._player_stats_link.updated_flag = False
-        self._players_link.updated_flag = False
-        self._scrim_stats_link.updated_flag = False
-        self._teams_link.updated_flag = False
-        self._fixtures_link.updated_flag = False
-        self._match_groups_link.updated_flag = False
-        self._matches_link.updated_flag = False
-        self.trackers_link.updated_flag = False
-
     def load(self):
         try:
             with open(self._file_name, 'rb') as f:  # Open save file
@@ -159,8 +154,9 @@ class Task_Sprocket:
                 self._match_groups_link.decompress(data[6])
                 self._matches_link.decompress(data[7])
                 self._trackers_link.decompress(data[8])
-                self._last_time_ran = data[9]['last_time_ran']
-                self._next_run_time = data[9]['next_run_time']
+                self._role_usages_link.decompress(data[9])
+                self._last_time_ran = data[10]['last_time_ran']
+                self._next_run_time = data[10]['next_run_time']
                 self._loaded = True
         except (KeyError, FileNotFoundError, EOFError) as e:
             self._next_run_time = datetime.datetime.now()
@@ -182,22 +178,13 @@ class Task_Sprocket:
             await self._match_groups_link.data()
             await self._matches_link.data()
             await self._trackers_link.data()
+            await self._role_usages_link.data()
         else:
             return
         self.__get_next_run_time__()
         self.save()
         for callback in self.on_updated:
-            await callback({
-                'sprocket_members': self._members_link.json_data,
-                'sprocket_player_stats': self._player_stats_link.json_data,
-                'sprocket_players': self._players_link.json_data,
-                'sprocket_scrim_stats': self._scrim_stats_link.json_data,
-                'sprocket_teams': self._teams_link.json_data,
-                'sprocket_fixtures': self._fixtures_link.json_data,
-                'sprocket_match_groups': self._match_groups_link.json_data,
-                'sprocket_matches': self._matches_link.json_data,
-                'sprocket_trackers': self._trackers_link.json_data,
-            })
+            await callback(self.data)
         await err('sprocket server links updated.')
 
     def save(self):
@@ -211,6 +198,7 @@ class Task_Sprocket:
                          self._match_groups_link.compress(),
                          self._matches_link.compress(),
                          self._trackers_link.compress(),
+                         self._role_usages_link.compress(),
                          {
                              'last_time_ran': self._last_time_ran,
                              'next_run_time': self._next_run_time,

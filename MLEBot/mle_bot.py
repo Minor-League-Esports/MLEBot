@@ -10,8 +10,9 @@ from PyDiscoBot import Bot
 from PyDiscoBot.commands import Commands
 
 # local imports #
-from franchise import Franchise
+from lo_commands import LoCommands
 from mle_commands import MLECommands
+import roles
 from task_roster import Task_Roster
 from task_sprocket import Task_Sprocket
 
@@ -34,18 +35,11 @@ class MLEBot(Bot):
                          command_cogs=command_cogs)
         self._sprocket = Task_Sprocket(self)
         self._roster = Task_Roster(self)
-        self._franchises: [Franchise] = []
+        self._guild_ids: [{}] = []
 
     @property
-    def franchises(self) -> [Franchise]:
-        return self._franchises
-
-    @property
-    def loaded(self) -> bool:
-        """ loaded status for bot\n
-        override to include external processes that need to load when initiating
-        """
-        return super().loaded and self.sprocket.all_links_loaded and self.roster.loaded
+    def guild_ids(self):
+        return self._guild_ids
 
     @property
     def roster(self) -> Task_Roster:
@@ -56,18 +50,15 @@ class MLEBot(Bot):
         return self._sprocket
 
     async def build_guilds(self):
-        if not self.sprocket.all_links_loaded:
-            self.sprocket.load()
-        for team in self.sprocket.data['sprocket_teams']:
-            _team_guild_id = os.getenv(team['name'].upper())
-            if _team_guild_id != '':
-                _team_guild = next((x for x in self.guilds if x.id == int(_team_guild_id)), None)
-                if _team_guild:
-                    _franchise = Franchise(self,
-                                           _team_guild,
-                                           team['name'])
-                    self._franchises.append(_franchise)
-                    await _franchise.init()
+        self._guild_ids.clear()
+        dotenv.load_dotenv()
+        for team in roles.ALL_TEAMS:
+            try:
+                _id = os.getenv(team).upper()
+                self._guild_ids.append({'team': team,
+                                        'id': _id})
+            except AttributeError:
+                continue
 
     async def get_help_cmds_by_user(self,
                                     ctx: discord.ext.commands.Context) -> [disco_commands.command]:
@@ -86,6 +77,10 @@ class MLEBot(Bot):
                     break
         return user_cmds
 
+    async def rebuild(self):
+        await self.build_guilds()
+        return True
+
     async def on_ready(self,
                        suppress_task=False) -> None:
         """ Method that is called by discord when the bot connects to the supplied guild\n
@@ -96,7 +91,7 @@ class MLEBot(Bot):
         """
         if self._initialized:
             await self.change_presence(
-                activity=discord.Activity(type=discord.ActivityType.playing, name='🐶 Bark Simulator 🐕'))
+                activity=discord.Activity(type=discord.ActivityType.listening, name='sweet EMILIO. 🪭'))
             return
         await super().on_ready(suppress_task)
 
@@ -104,7 +99,7 @@ class MLEBot(Bot):
         await self.build_guilds()
 
         await self.change_presence(
-            activity=discord.Activity(type=discord.ActivityType.playing, name='🐶 Bark Simulator 🐕'))
+            activity=discord.Activity(type=discord.ActivityType.listening, name='sweet EMILIO. 🪭'))
 
     async def on_task(self) -> None:
         await super().on_task()
@@ -124,5 +119,5 @@ if __name__ == '__main__':
     intents.messages = True
     bot = MLEBot(['ub.', 'Ub.', 'UB.'],
                  intents,
-                 [Commands, MLECommands])
+                 [Commands, MLECommands, LoCommands])
     bot.run(os.getenv('DISCORD_TOKEN'))

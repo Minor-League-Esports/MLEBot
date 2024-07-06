@@ -15,7 +15,6 @@ class SprocketDataLink:
         self.url_link = url_link
         self.last_time_updated: datetime.datetime | None = None
         self.json_data = None
-        self.updated_flag = False
 
     def compress(self):
         return {

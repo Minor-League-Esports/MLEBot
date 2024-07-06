@@ -6,14 +6,13 @@
 #
 # v1.0.6 - Include slash commands
 """
-import PyDiscoBot
 from PyDiscoBot import channels
 from PyDiscoBot import Pagination, InteractionPagination
+from PyDiscoBot import ReportableError
 
 # local imports #
 from enums import *
-from member import Member
-import roles
+import team
 from team import get_league_text
 from franchise import SALARY_CAP_PL, SALARY_CAP_ML, SALARY_CAP_CL, SALARY_CAP_AL, SALARY_CAP_FL
 
@@ -22,6 +21,8 @@ import difflib
 import discord
 from discord import app_commands
 from discord.ext import commands
+import os
+import dotenv
 
 
 class MLECommands(commands.Cog):
@@ -86,14 +87,28 @@ class MLECommands(commands.Cog):
             embed.add_field(name='**Tracker Link**', value=tracker_player['tracker'], inline=False)
         await interaction.response.send_message(embed=embed)
 
-    def bot_loaded(self) -> bool:
-        return self.bot.loaded
+    async def __resolve_franchise__(self,
+                                    interaction: discord.Interaction):
+        _known_guild = next((x for x in self.bot.guild_ids if str(x['id']) == interaction.guild.id.__str__()), None)
+        if not _known_guild:
+            return None
+        return next(
+            (x for x in self.bot.sprocket.data['sprocket_teams'] if x['name'].upper() == _known_guild['team'].upper()),
+            None)
 
-    async def cog_check(self,
-                        ctx: discord.ext.commands.Context):
-        if not self.bot_loaded():
-            raise PyDiscoBot.BotNotLoaded('Bot is not yet loaded. Please try again.')
-        return True
+    @staticmethod
+    def get_sprocket_player_team_info(sprocket_player) -> str | None:
+        return f"`{sprocket_player['slot'].removeprefix('PLAYER')} | {sprocket_player['salary']} | {sprocket_player['name']}`"
+
+    def get_sprocket_usage_team_info(self,
+                                     sprocket_player) -> str | None:
+        role_usage = next((x for x in self.bot.sprocket.data['role_usages'] if
+                           (x['role'] == sprocket_player['slot']) and x['team_name'] == sprocket_player['franchise'] and
+                           x['league'].lower() in sprocket_player['skill_group'].lower()),
+                          None)
+        if not role_usage:
+            return None
+        return f"`{sprocket_player['slot'].removeprefix('PLAYER')} | 2s: {role_usage['doubles_uses']} | 3s: {role_usage['standard_uses']} | Total: {role_usage['total_uses']} | {sprocket_player['name']}`"
 
     @app_commands.command(name='clearchannel',
                           description='Clear channel messages. Include amt of messages to delete.\n Max is 100. (e.g. ub.clearchannel 55)')
@@ -113,6 +128,22 @@ class MLECommands(commands.Cog):
                      mle_name: str):
         await self.__local_lookup__(interaction,
                                     mle_name)
+
+    @app_commands.command(name='rebuild',
+                          description='Rebuild bot meta data.')
+    @app_commands.guilds(1043295434828947547)
+    @app_commands.default_permissions()
+    async def rebuild(self,
+                      interaction: discord.Interaction):
+        await interaction.response.defer()
+        if await self.bot.rebuild():
+            await self.bot.send_notification(interaction,
+                                             'Success!.',
+                                             as_followup=True)
+        else:
+            await self.bot.send_notification(interaction,
+                                             'An error has occured.',
+                                             as_followup=True)
 
     @app_commands.command(name='query',
                           description='Lookup groups of players by provided filter.')
@@ -201,19 +232,67 @@ class MLECommands(commands.Cog):
 
         await InteractionPagination(interaction, get_page).navigate()
 
+    @app_commands.command(name='regrosterchannel',
+                          description='Register Franchise Roster Channel for roster posting functionality.')
+    @app_commands.default_permissions()
+    async def regrosterchannel(self,
+                               interaction: discord.Interaction):
+        _team = await self.__resolve_franchise__(interaction)
+        if not _team:
+            await self.bot.send_notification(interaction,
+                                             'Could not resolve this franchise from sprocket data!',
+                                             as_followup=False)
+            return
+        try:
+            dotenv.set_key(dotenv.find_dotenv(),
+                           f"{_team['name'].upper()}_ROSTER",
+                           str(interaction.channel_id),
+                           quote_mode='never')
+            # os.environ[f"{_team['name'].upper()}_ROSTER"] = str(interaction.channel_id)
+            await self.bot.send_notification(interaction,
+                                             'Success!',
+                                             as_followup=False)
+        except KeyError:
+            await self.bot.send_notification(interaction,
+                                             'An error has occurred!',
+                                             as_followup=False)
+
     @app_commands.command(name='runroster',
                           description='Run a refresh of the roster channel.')
     @app_commands.default_permissions()
     async def runroster(self,
                         interaction: discord.Interaction):
         await interaction.response.defer()
-        if await self.bot.roster.post_roster():
+        _team = await self.__resolve_franchise__(interaction)
+        if not _team:
             await self.bot.send_notification(interaction,
-                                             '`Successfully ran updated roster schedule.`',
+                                             'Could not resolve this franchise from sprocket data!',
+                                             as_followup=True)
+            return
+
+        dotenv.load_dotenv()
+        _channel_id = os.getenv(f"{_team['name'].upper()}_ROSTER")
+        if not _channel_id:
+            await self.bot.send_notification(interaction,
+                                             'Roster channel has not been configured! Run /regrosterchannel!',
+                                             as_followup=True)
+            return
+
+        _channel = next((x for x in interaction.guild.channels if x.id.__str__() == str(_channel_id)), None)
+        if not _channel:
+            await self.bot.send_notification(interaction,
+                                             'Roster channel has not been found! Run /regrosterchannel!',
+                                             as_followup=True)
+            return
+
+        if await self.bot.roster.post_roster(_team,
+                                             _channel):
+            await self.bot.send_notification(interaction,
+                                             'Success!',
                                              as_followup=True)
         else:
             await self.bot.send_notification(interaction,
-                                             '`An Error Has Occurred.`',
+                                             'Failure!',
                                              as_followup=True)
 
     @app_commands.command(name='salary',
@@ -237,22 +316,70 @@ class MLECommands(commands.Cog):
         await self.bot.franchise.post_season_stats_html(league.lower(),
                                                         ctx)
 
-    @app_commands.command(name='showmembers',
-                          description='Show all league members for this franchise.')
+    @app_commands.command(name='showusage',
+                          description='Show game usage stats for all league members of this franchise.')
     @app_commands.default_permissions()
-    async def showmembers(self,
-                          interaction: discord.Interaction):
+    async def showusage(self,
+                        interaction: discord.Interaction):
         await interaction.response.defer()
-        _franchise = next((x for x in self.bot.franchises if x.guild == interaction.guild), None)
-        if not _franchise:
+        _team = await self.__resolve_franchise__(interaction)
+        if not _team:
             await self.bot.send_notification(interaction,
-                                             'Guild not managed by this bot! Cannot find appropriate members!')
+                                             'Could not resolve this franchise from sprocket data!',
+                                             as_followup=True)
+            return
 
-        for _team in _franchise.teams:
-            await self.desc_builder(interaction,
-                                    get_league_text(_team.league),
-                                    _team.players,
-                                    _franchise)
+        _players = [x for x in self.bot.sprocket.data['sprocket_players'] if x['franchise'] == _team['name']]
+        if not _players:
+            await self.bot.send_notification(interaction,
+                                             'Could not get players for this franchise from sprocket!',
+                                             as_followup=True)
+            return
+
+        _pl_players = [x for x in _players if x['skill_group'] == 'Premier League' and x['slot'] != 'NONE']
+        _ml_players = [x for x in _players if x['skill_group'] == 'Master League' and x['slot'] != 'NONE']
+        _cl_players = [x for x in _players if x['skill_group'] == 'Champion League' and x['slot'] != 'NONE']
+        _al_players = [x for x in _players if x['skill_group'] == 'Academy League' and x['slot'] != 'NONE']
+        _fl_players = [x for x in _players if x['skill_group'] == 'Foundation League' and x['slot'] != 'NONE']
+
+        embed = (discord.Embed(
+            color=discord.Color.from_str(_team['primary_color']),
+            title=f"**{_team['name']} Slot Usage Info**",
+            description='Data gathered by sprocket public data links.\n'
+                        'See more at [sprocket links](https://f004.backblazeb2.com/file/sprocket-artifacts/public/pages/index.html)\n')
+                 .set_footer(text=f'Generated: {self.bot.last_time}'))
+        embed.set_thumbnail(url=_team['logo_img_link'])
+
+        embed.add_field(name='**Season Slot Allowances**',
+                        value='`Doubles: 6 | Standard: 8 | Total: 12`   ',
+                        inline=False)
+
+        self.__show_usage_league__(sorted(_pl_players, key=lambda _p: _p['slot']),
+                                   embed,
+                                   'Premier',
+                                   SALARY_CAP_PL)
+
+        self.__show_usage_league__(sorted(_ml_players, key=lambda _p: _p['slot']),
+                                   embed,
+                                   'Master',
+                                   SALARY_CAP_ML)
+
+        self.__show_usage_league__(sorted(_cl_players, key=lambda _p: _p['slot']),
+                                   embed,
+                                   'Champion',
+                                   SALARY_CAP_CL)
+
+        self.__show_usage_league__(sorted(_al_players, key=lambda _p: _p['slot']),
+                                   embed,
+                                   'Academy',
+                                   SALARY_CAP_AL)
+
+        self.__show_usage_league__(sorted(_fl_players, key=lambda _p: _p['slot']),
+                                   embed,
+                                   'Foundation',
+                                   SALARY_CAP_FL)
+
+        await interaction.followup.send(embed=embed)
 
     @app_commands.command(name='teameligibility',
                           description='Show team eligibility. Include league after command.\n\t(e.g. ub.teameligibility fl)')
@@ -277,131 +404,120 @@ class MLECommands(commands.Cog):
             await self.bot.send_notification(interaction,
                                              'League not found. Please enter a valid league.')
             return
+        _league_text = get_league_text(_league_enum)
 
-        _franchise = next((x for x in self.bot.franchises if x.guild == interaction.guild), None)
-        if not _franchise:
+        _team = await self.__resolve_franchise__(interaction)
+        if not _team:
             await self.bot.send_notification(interaction,
-                                             'Guild not managed by this bot! Cannot find appropriate members!')
+                                             'Could not resolve this franchise from sprocket data!',
+                                             as_followup=True)
+            return
 
-        _players = await _franchise.get_team_eligibility(_league_enum)
-
+        _players = [x for x in self.bot.sprocket.data['sprocket_players'] if x['franchise'] == _team['name']]
         if not _players:
+            await self.bot.send_notification(interaction,
+                                             'Could not get players for this franchise from sprocket!',
+                                             as_followup=True)
+            return
+
+        _league_players = sorted([x for x in _players if x['skill_group'] == _league_text and x['slot'] != 'NONE'],
+                                 key=lambda x: x['slot'])
+        if not _league_players:
             await self.bot.send_notification(interaction,
                                              'An error has occurred.')
             return
 
         await interaction.response.defer()
         embed = self.bot.default_embed(
-            f'{get_league_text(_league_enum)} {_franchise.franchise_name} Eligibility Information',
-            color=discord.Color.from_str(_franchise.sprocket_team['primary_color']))
-        embed.set_thumbnail(url=_franchise.sprocket_team['logo_img_link'])
+            f"{_league_text} {_team['name']} Eligibility Information",
+            color=discord.Color.from_str(_team['primary_color']))
+        embed.set_thumbnail(url=_team['logo_img_link'])
 
         ljust_limit = 8
 
-        for _p in [_x for _x in _players if _x.role != 'NONE']:
-            embed.add_field(name=f"**{_p.mle_name}**",
-                            value=f"`{'Role:'.ljust(ljust_limit)}` {_p.role}\n"
-                                  f"`{'Salary:'.ljust(ljust_limit)}` {_p.salary}\n"
-                                  f"`{'Points:'.ljust(ljust_limit)}` {_p.scrim_points.__str__()}\n"
+        for _p in _league_players:
+            embed.add_field(name=f"**{_p['name']}**",
+                            value=f"`{'Role:'.ljust(ljust_limit)}` {_p['slot']}\n"
+                                  f"`{'Salary:'.ljust(ljust_limit)}` {_p['salary']}\n"
+                                  f"`{'Points:'.ljust(ljust_limit)}` {_p['current_scrim_points'].__str__()}\n"
                                   f"`{'Until:'.ljust(ljust_limit)}` ~TBD~",
                             inline=True)
-
-        # embed.add_field(name=f'{"Role".ljust(12)}  {"name".ljust(30)} {"sal".ljust(14)} {"id".ljust(8)} {"scrim pts"}    {"eligible?"}',
-        #                 value='\n'.join([f'**`{p.role.ljust(7)}`**  `{str(p.mle_name.ljust(14)) if p.mle_name else "N/A?".ljust(14)}` `{str(p.salary).ljust(6) if p.salary else "N/A?".ljust(6)}` `{p.mle_id.__str__().ljust(8) if p.mle_id else "N/A?".ljust(8)}` `{p.scrim_points.__str__().ljust(8)}` `{"Yes" if p.eligible else "No"}`' for p in _players]),
-        #                 inline=False)
 
         await interaction.followup.send(embed=embed)
 
     @app_commands.command(name='teaminfo',
                           description='Get information about a team from the league!\n\tInclude team after command. (e.g. ub.teaminfo sabres)')
-    @app_commands.describe(team='MLE Team to get info about')
+    @app_commands.describe(_team_name='MLE Team to get info about.')
     @app_commands.default_permissions()
     async def teaminfo(self,
                        interaction: discord.Interaction,
-                       team: str):
-        if not team:
-            await self.bot.send_notification(interaction,
-                                             'You must provide a team when running this command!')
-            return
-        _team = next((x for x in self.bot.sprocket.data['sprocket_teams'] if x['name'].lower() == team.lower()), None)
+                       _team_name: str):
+
+        if not _team_name:
+            raise ReportableError('You must provide a team when running this command!')
+
+        _team = next((x for x in self.bot.sprocket.data['sprocket_teams'] if x['name'].lower() == _team_name.lower()),
+                     None)
         if not _team:
-            await self.bot.send_notification(interaction,
-                                             f'Could not find team {team} in sprocket data base!\nPlease try again!')
-            return
+            raise ReportableError(f'Could not find team `{_team_name}` in sprocket data base!\nPlease try again!')
 
-        embed = (discord.Embed(color=discord.Color.from_str(_team['primary_color']),
-                               title=f"{_team['name']} Roster")
-                 .set_footer(text=f'Generated: {self.bot.last_time}'))
-        embed.set_thumbnail(url=_team['logo_img_link'])
-
-        _team_players = [x for x in self.bot.sprocket.data['sprocket_players'] if x['franchise'] == _team['name']]
-        if not _team_players:
-            await self.bot.send_notification(interaction,
-                                             'Could not find players for franchise!')
-            return
+        embed = team.get_mle_franchise_embed(_team)
 
         await interaction.response.defer()
-        _fm = next((x for x in _team_players if x['Franchise Staff Position'] == 'Franchise Manager'), None)
-        _gm = next((x for x in _team_players if x['Franchise Staff Position'] == 'General Manager'), None)
-        _agms = [x for x in _team_players if x['Franchise Staff Position'] == 'Assistant General Manager']
-        _captains = [x for x in _team_players if x['Franchise Staff Position'] == 'Captain']
-        _pr_supports = [x for x in _team_players if x['Franchise Staff Position'] == 'PR Support']
+        _team_players = team.get_defined_team_players(_team,
+                                                      self.bot.sprocket.data)
+        if not _team_players:
+            raise ReportableError('Could not find players for franchise!')
 
-        _pl_players = [x for x in _team_players if x['skill_group'] == 'Premier League' and x['slot'] != 'NONE']
-        _ml_players = [x for x in _team_players if x['skill_group'] == 'Master League' and x['slot'] != 'NONE']
-        _cl_players = [x for x in _team_players if x['skill_group'] == 'Champion League' and x['slot'] != 'NONE']
-        _al_players = [x for x in _team_players if x['skill_group'] == 'Academy League' and x['slot'] != 'NONE']
-        _fl_players = [x for x in _team_players if x['skill_group'] == 'Foundation League' and x['slot'] != 'NONE']
+        embed.add_field(name='**Franchise Manager**',
+                        value=f"`{_team_players['fm']['name']}`" if _team_players['fm'] else "",
+                        inline=False)
 
-        if _fm:
-            embed.add_field(name='**Franchise Manager**',
-                            value=f"`{_fm['name']}`" if _fm else "",
-                            inline=False)
+        embed.add_field(name='**General Manager**',
+                        value=f"\n".join([f"`{gm['name']}`" for gm in _team_players['gms']]),
+                        inline=False)
 
-        if _gm:
-            embed.add_field(name='**General Manager**',
-                            value=f"`{_gm['name']}`" if _gm else "",
-                            inline=False)
-
-        if len(_agms) != 0:
+        if len(_team_players['agms']) != 0:
             embed.add_field(name='**Assistant General Managers**',
-                            value=f"\n".join([f"`{x['name']}`" for x in _agms]),
+                            value=f"\n".join([f"`{agm['name']}`" for agm in _team_players['agms']]),
                             inline=False)
 
-        if len(_captains) != 0:
+        if len(_team_players['captains']) != 0:
             embed.add_field(name='**Captains**',
-                            value=f"\n".join([f"`{x['name']}`" for x in _captains]),
+                            value=f"\n".join([f"`{x['name']}`" for x in _team_players['captains']]),
                             inline=False)
 
-        if len(_pr_supports) != 0:
+        if len(_team_players['pr_supports']) != 0:
             embed.add_field(name='**PR Supports**',
-                            value=f"\n".join([f"`{x['name']}`" for x in _pr_supports]),
+                            value=f"\n".join([f"`{x['name']}`" for x in _team_players['pr_supports']]),
                             inline=False)
 
-        MLECommands.__team_info_league__(sorted(_pl_players, key=lambda _p: _p['slot']),
-                                         embed,
-                                         'Premier',
-                                         SALARY_CAP_PL)
+        embed.add_field(name='**Roster**', value='**`[Top5/SalCap] [CanSign] League`**', inline=False)
 
-        MLECommands.__team_info_league__(sorted(_ml_players, key=lambda _p: _p['slot']),
-                                         embed,
-                                         'Master',
-                                         SALARY_CAP_ML)
+        self.__team_info_league__(sorted(_team_players['pl_players'], key=lambda _p: _p['slot']),
+                                  embed,
+                                  'Premier',
+                                  SALARY_CAP_PL)
 
-        MLECommands.__team_info_league__(sorted(_cl_players, key=lambda _p: _p['slot']),
-                                         embed,
-                                         'Champion',
-                                         SALARY_CAP_CL)
+        self.__team_info_league__(sorted(_team_players['ml_players'], key=lambda _p: _p['slot']),
+                                  embed,
+                                  'Master',
+                                  SALARY_CAP_ML)
 
-        MLECommands.__team_info_league__(sorted(_al_players, key=lambda _p: _p['slot']),
-                                         embed,
-                                         'Academy',
-                                         SALARY_CAP_AL)
+        self.__team_info_league__(sorted(_team_players['cl_players'], key=lambda _p: _p['slot']),
+                                  embed,
+                                  'Champion',
+                                  SALARY_CAP_CL)
 
-        MLECommands.__team_info_league__(sorted(_fl_players, key=lambda _p: _p['slot']),
-                                         embed,
-                                         'Foundation',
-                                         SALARY_CAP_FL)
+        self.__team_info_league__(sorted(_team_players['al_players'], key=lambda _p: _p['slot']),
+                                  embed,
+                                  'Academy',
+                                  SALARY_CAP_AL)
+
+        self.__team_info_league__(sorted(_team_players['fl_players'], key=lambda _p: _p['slot']),
+                                  embed,
+                                  'Foundation',
+                                  SALARY_CAP_FL)
 
         await interaction.followup.send(embed=embed)
 
@@ -417,52 +533,59 @@ class MLECommands(commands.Cog):
                                          'League-Sprocket update complete.',
                                          as_followup=True)
 
-    async def desc_builder(self,
-                           interaction: discord.Interaction,
-                           title: str,
-                           players: [Member],
-                           _franchise):
-        embed: discord.Embed = self.bot.default_embed(title,
-                                                      '',
-                                                      color=discord.Color.from_str(
-                                                          _franchise.sprocket_team['primary_color']))
-        embed.add_field(name='name                                 sal       id',
-                        value='\n'.join(
-                            [
-                                f'` {_p.mle_name.ljust(16) if _p.mle_name else "N/A?".ljust(16)} {str(_p.salary).ljust(4) if _p.salary else "N/A?"} {str(_p.mle_id).ljust(4) if _p.mle_id else "N/A??   "} `'
-                                for _p in players]),
-                        inline=False)
-        embed.set_thumbnail(url=_franchise.sprocket_team['logo_img_link'])
-        await interaction.followup.send(embed=embed)
-
-    @commands.Cog.listener()
-    async def on_member_update(self,
-                               before: discord.Member,
-                               after: discord.Member):
-        return
-        if len(before.roles) != len(after.roles):
-            for role in after.roles:
-                if role in roles.FRANCHISE_ROLES:
-                    self.bot.roster.run_req = True
-
-    @staticmethod
-    def __team_info_league__(players: [],
+    def __team_info_league__(self,
+                             players: [],
                              embed: discord.Embed,
                              league_name: str,
                              salary_cap: float):
-        if players:
-            top_sals = sorted(players,
-                              key=lambda p: p['salary'],
-                              reverse=True)
-            sal_ceiling = 0.0
-            range_length = 5 if len(players) >= 5 else len(players)
-            for i in range(range_length):
-                sal_ceiling += top_sals[i]['salary']
-            embed.add_field(name=f'**`[{sal_ceiling} / {salary_cap}]` {league_name}**',
-                            value='\n'.join(
-                                [f"`{_p['slot'].removeprefix('PLAYER')} | {_p['salary']} | {_p['name']}`" for _p in
-                                 players if _p['slot'] != 'NONE']),
-                            inline=False)
+        if not players:
+            return
+
+        players_strings = '\n'.join(
+            [self.get_sprocket_player_team_info(player) for player in players if player is not None])
+
+        embed.add_field(
+            name=get_team_salary_string(players,
+                                        league_name,
+                                        salary_cap),
+            value=players_strings,
+            inline=False)
+
+    def __show_usage_league__(self,
+                              players: [],
+                              embed: discord.Embed,
+                              league_name: str,
+                              salary_cap: float):
+        if not players:
+            return
+
+        players_strings = '\n'.join(
+            [self.get_sprocket_usage_team_info(player) for player in players if player is not None])
+
+        embed.add_field(
+            name=league_name,
+            value=players_strings,
+            inline=False)
+
+
+def get_players_salary_ceiling(top_sals: [{}]) -> float:
+    sal_ceiling = 0.0
+    range_length = 5 if len(top_sals) >= 5 else len(top_sals)
+    for i in range(range_length):
+        sal_ceiling += top_sals[i]['salary']
+    return sal_ceiling
+
+
+def get_team_salary_string(players: [],
+                           league_name: str,
+                           salary_cap: float) -> str:
+    top_sals = sorted(players,
+                      key=lambda p: p['salary'],
+                      reverse=True)
+    sal_ceiling = get_players_salary_ceiling(top_sals)
+    _sign = '+' if sal_ceiling >= salary_cap else '-'
+    _signable_str = f"+{top_sals[-1]['salary'] + (salary_cap - sal_ceiling)}" if sal_ceiling <= salary_cap else "NONE"
+    return f'**`[{sal_ceiling} / {salary_cap}] [{_signable_str}]` {league_name}**'
 
 
 def get_league_enum_by_short_text(league: str):

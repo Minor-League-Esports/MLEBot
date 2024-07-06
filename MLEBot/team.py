@@ -13,10 +13,10 @@ from enums import LeagueEnum
 
 # non-local imports #
 import os
+import datetime
 import discord
 from discord.ext import commands
 from html2image import Html2Image
-
 
 MLE_SEASON = 'Season 17'
 EMOTE_CHECK_GREEN = ':white_check_mark:'
@@ -268,115 +268,115 @@ class Team:
             The dictionary above will fill out this file
         """
         html_string = open(r'team/html/TeamWeeklyStats.html').read().format(league=get_league_text(self.league),
-                                                                               mode=game_mode,
-                                                                               home_team_wk_1=wk['1']['home_team'],
-                                                                               away_team_wk_1=wk['1']['away_team'],
-                                                                               home_team_wk_1_clr=wk['1']['home_color'],
-                                                                               away_team_wk_1_clr=wk['1']['away_color'],
-                                                                               home_team_wk_1_logo=wk['1']['home_url'],
-                                                                               away_team_wk_1_logo=wk['1']['away_url'],
-                                                                               score_wk_1=wk['1']['score'],
-                                                                               home_team_wk_2=wk['2']['home_team'],
-                                                                               away_team_wk_2=wk['2']['away_team'],
-                                                                               home_team_wk_2_clr=wk['2']['home_color'],
-                                                                               away_team_wk_2_clr=wk['2']['away_color'],
-                                                                               home_team_wk_2_logo=wk['2']['home_url'],
-                                                                               away_team_wk_2_logo=wk['2']['away_url'],
-                                                                               score_wk_2=wk['2']['score'],
-                                                                               home_team_wk_3=wk['3']['home_team'],
-                                                                               away_team_wk_3=wk['3']['away_team'],
-                                                                               home_team_wk_3_clr=wk['3']['home_color'],
-                                                                               away_team_wk_3_clr=wk['3']['away_color'],
-                                                                               home_team_wk_3_logo=wk['3']['home_url'],
-                                                                               away_team_wk_3_logo=wk['3']['away_url'],
-                                                                               score_wk_3=wk['3']['score'],
-                                                                               home_team_wk_4=wk['4']['home_team'],
-                                                                               away_team_wk_4=wk['4']['away_team'],
-                                                                               home_team_wk_4_clr=wk['4']['home_color'],
-                                                                               away_team_wk_4_clr=wk['4']['away_color'],
-                                                                               home_team_wk_4_logo=wk['4']['home_url'],
-                                                                               away_team_wk_4_logo=wk['4']['away_url'],
-                                                                               score_wk_4=wk['4']['score'],
-                                                                               home_team_wk_5=wk['5']['home_team'],
-                                                                               away_team_wk_5=wk['5']['away_team'],
-                                                                               home_team_wk_5_clr=wk['5']['home_color'],
-                                                                               away_team_wk_5_clr=wk['5']['away_color'],
-                                                                               home_team_wk_5_logo=wk['5']['home_url'],
-                                                                               away_team_wk_5_logo=wk['5']['away_url'],
-                                                                               score_wk_5=wk['5']['score'],
-                                                                               home_team_wk_6=wk['6']['home_team'],
-                                                                               away_team_wk_6=wk['6']['away_team'],
-                                                                               home_team_wk_6_clr=wk['6']['home_color'],
-                                                                               away_team_wk_6_clr=wk['6']['away_color'],
-                                                                               home_team_wk_6_logo=wk['6']['home_url'],
-                                                                               away_team_wk_6_logo=wk['6']['away_url'],
-                                                                               score_wk_6=wk['6']['score'],
-                                                                               home_team_wk_7=wk['7']['home_team'],
-                                                                               away_team_wk_7=wk['7']['away_team'],
-                                                                               home_team_wk_7_clr=wk['7']['home_color'],
-                                                                               away_team_wk_7_clr=wk['7']['away_color'],
-                                                                               home_team_wk_7_logo=wk['7']['home_url'],
-                                                                               away_team_wk_7_logo=wk['7']['away_url'],
-                                                                               score_wk_7=wk['7']['score'],
-                                                                               home_team_wk_8=wk['8']['home_team'],
-                                                                               away_team_wk_8=wk['8']['away_team'],
-                                                                               home_team_wk_8_clr=wk['8']['home_color'],
-                                                                               away_team_wk_8_clr=wk['8']['away_color'],
-                                                                               home_team_wk_8_logo=wk['8']['home_url'],
-                                                                               away_team_wk_8_logo=wk['8']['away_url'],
-                                                                               score_wk_8=wk['8']['score'],
-                                                                               home_team_wk_9=wk['9']['home_team'],
-                                                                               away_team_wk_9=wk['9']['away_team'],
-                                                                               home_team_wk_9_clr=wk['9']['home_color'],
-                                                                               away_team_wk_9_clr=wk['9']['away_color'],
-                                                                               home_team_wk_9_logo=wk['9']['home_url'],
-                                                                               away_team_wk_9_logo=wk['9']['away_url'],
-                                                                               score_wk_9=wk['9']['score'],
-                                                                               home_team_wk_10=wk['10']['home_team'],
-                                                                               away_team_wk_10=wk['10']['away_team'],
-                                                                               home_team_wk_10_clr=wk['10'][
-                                                                                   'home_color'],
-                                                                               away_team_wk_10_clr=wk['10'][
-                                                                                   'away_color'],
-                                                                               home_team_wk_10_logo=wk['10'][
-                                                                                   'home_url'],
-                                                                               away_team_wk_10_logo=wk['10'][
-                                                                                   'away_url'],
-                                                                               score_wk_10=wk['10']['score'],
-                                                                               home_team_wk_11=wk['11']['home_team'],
-                                                                               away_team_wk_11=wk['11']['away_team'],
-                                                                               home_team_wk_11_clr=wk['11'][
-                                                                                   'home_color'],
-                                                                               away_team_wk_11_clr=wk['11'][
-                                                                                   'away_color'],
-                                                                               home_team_wk_11_logo=wk['11'][
-                                                                                   'home_url'],
-                                                                               away_team_wk_11_logo=wk['11'][
-                                                                                   'away_url'],
-                                                                               score_wk_11=wk['11']['score'],
-                                                                               home_team_wk_12=wk['12']['home_team'],
-                                                                               away_team_wk_12=wk['12']['away_team'],
-                                                                               home_team_wk_12_clr=wk['12'][
-                                                                                   'home_color'],
-                                                                               away_team_wk_12_clr=wk['12'][
-                                                                                   'away_color'],
-                                                                               home_team_wk_12_logo=wk['12'][
-                                                                                   'home_url'],
-                                                                               away_team_wk_12_logo=wk['12'][
-                                                                                   'away_url'],
-                                                                               score_wk_12=wk['12']['score'],
-                                                                               home_team_wk_13=wk['13']['home_team'],
-                                                                               away_team_wk_13=wk['13']['away_team'],
-                                                                               home_team_wk_13_clr=wk['13'][
-                                                                                   'home_color'],
-                                                                               away_team_wk_13_clr=wk['13'][
-                                                                                   'away_color'],
-                                                                               home_team_wk_13_logo=wk['13'][
-                                                                                   'home_url'],
-                                                                               away_team_wk_13_logo=wk['13'][
-                                                                                   'away_url'],
-                                                                               score_wk_13=wk['13']['score'],
-                                                                               team_imgurl=self.franchise.bot.server_icon)
+                                                                            mode=game_mode,
+                                                                            home_team_wk_1=wk['1']['home_team'],
+                                                                            away_team_wk_1=wk['1']['away_team'],
+                                                                            home_team_wk_1_clr=wk['1']['home_color'],
+                                                                            away_team_wk_1_clr=wk['1']['away_color'],
+                                                                            home_team_wk_1_logo=wk['1']['home_url'],
+                                                                            away_team_wk_1_logo=wk['1']['away_url'],
+                                                                            score_wk_1=wk['1']['score'],
+                                                                            home_team_wk_2=wk['2']['home_team'],
+                                                                            away_team_wk_2=wk['2']['away_team'],
+                                                                            home_team_wk_2_clr=wk['2']['home_color'],
+                                                                            away_team_wk_2_clr=wk['2']['away_color'],
+                                                                            home_team_wk_2_logo=wk['2']['home_url'],
+                                                                            away_team_wk_2_logo=wk['2']['away_url'],
+                                                                            score_wk_2=wk['2']['score'],
+                                                                            home_team_wk_3=wk['3']['home_team'],
+                                                                            away_team_wk_3=wk['3']['away_team'],
+                                                                            home_team_wk_3_clr=wk['3']['home_color'],
+                                                                            away_team_wk_3_clr=wk['3']['away_color'],
+                                                                            home_team_wk_3_logo=wk['3']['home_url'],
+                                                                            away_team_wk_3_logo=wk['3']['away_url'],
+                                                                            score_wk_3=wk['3']['score'],
+                                                                            home_team_wk_4=wk['4']['home_team'],
+                                                                            away_team_wk_4=wk['4']['away_team'],
+                                                                            home_team_wk_4_clr=wk['4']['home_color'],
+                                                                            away_team_wk_4_clr=wk['4']['away_color'],
+                                                                            home_team_wk_4_logo=wk['4']['home_url'],
+                                                                            away_team_wk_4_logo=wk['4']['away_url'],
+                                                                            score_wk_4=wk['4']['score'],
+                                                                            home_team_wk_5=wk['5']['home_team'],
+                                                                            away_team_wk_5=wk['5']['away_team'],
+                                                                            home_team_wk_5_clr=wk['5']['home_color'],
+                                                                            away_team_wk_5_clr=wk['5']['away_color'],
+                                                                            home_team_wk_5_logo=wk['5']['home_url'],
+                                                                            away_team_wk_5_logo=wk['5']['away_url'],
+                                                                            score_wk_5=wk['5']['score'],
+                                                                            home_team_wk_6=wk['6']['home_team'],
+                                                                            away_team_wk_6=wk['6']['away_team'],
+                                                                            home_team_wk_6_clr=wk['6']['home_color'],
+                                                                            away_team_wk_6_clr=wk['6']['away_color'],
+                                                                            home_team_wk_6_logo=wk['6']['home_url'],
+                                                                            away_team_wk_6_logo=wk['6']['away_url'],
+                                                                            score_wk_6=wk['6']['score'],
+                                                                            home_team_wk_7=wk['7']['home_team'],
+                                                                            away_team_wk_7=wk['7']['away_team'],
+                                                                            home_team_wk_7_clr=wk['7']['home_color'],
+                                                                            away_team_wk_7_clr=wk['7']['away_color'],
+                                                                            home_team_wk_7_logo=wk['7']['home_url'],
+                                                                            away_team_wk_7_logo=wk['7']['away_url'],
+                                                                            score_wk_7=wk['7']['score'],
+                                                                            home_team_wk_8=wk['8']['home_team'],
+                                                                            away_team_wk_8=wk['8']['away_team'],
+                                                                            home_team_wk_8_clr=wk['8']['home_color'],
+                                                                            away_team_wk_8_clr=wk['8']['away_color'],
+                                                                            home_team_wk_8_logo=wk['8']['home_url'],
+                                                                            away_team_wk_8_logo=wk['8']['away_url'],
+                                                                            score_wk_8=wk['8']['score'],
+                                                                            home_team_wk_9=wk['9']['home_team'],
+                                                                            away_team_wk_9=wk['9']['away_team'],
+                                                                            home_team_wk_9_clr=wk['9']['home_color'],
+                                                                            away_team_wk_9_clr=wk['9']['away_color'],
+                                                                            home_team_wk_9_logo=wk['9']['home_url'],
+                                                                            away_team_wk_9_logo=wk['9']['away_url'],
+                                                                            score_wk_9=wk['9']['score'],
+                                                                            home_team_wk_10=wk['10']['home_team'],
+                                                                            away_team_wk_10=wk['10']['away_team'],
+                                                                            home_team_wk_10_clr=wk['10'][
+                                                                                'home_color'],
+                                                                            away_team_wk_10_clr=wk['10'][
+                                                                                'away_color'],
+                                                                            home_team_wk_10_logo=wk['10'][
+                                                                                'home_url'],
+                                                                            away_team_wk_10_logo=wk['10'][
+                                                                                'away_url'],
+                                                                            score_wk_10=wk['10']['score'],
+                                                                            home_team_wk_11=wk['11']['home_team'],
+                                                                            away_team_wk_11=wk['11']['away_team'],
+                                                                            home_team_wk_11_clr=wk['11'][
+                                                                                'home_color'],
+                                                                            away_team_wk_11_clr=wk['11'][
+                                                                                'away_color'],
+                                                                            home_team_wk_11_logo=wk['11'][
+                                                                                'home_url'],
+                                                                            away_team_wk_11_logo=wk['11'][
+                                                                                'away_url'],
+                                                                            score_wk_11=wk['11']['score'],
+                                                                            home_team_wk_12=wk['12']['home_team'],
+                                                                            away_team_wk_12=wk['12']['away_team'],
+                                                                            home_team_wk_12_clr=wk['12'][
+                                                                                'home_color'],
+                                                                            away_team_wk_12_clr=wk['12'][
+                                                                                'away_color'],
+                                                                            home_team_wk_12_logo=wk['12'][
+                                                                                'home_url'],
+                                                                            away_team_wk_12_logo=wk['12'][
+                                                                                'away_url'],
+                                                                            score_wk_12=wk['12']['score'],
+                                                                            home_team_wk_13=wk['13']['home_team'],
+                                                                            away_team_wk_13=wk['13']['away_team'],
+                                                                            home_team_wk_13_clr=wk['13'][
+                                                                                'home_color'],
+                                                                            away_team_wk_13_clr=wk['13'][
+                                                                                'away_color'],
+                                                                            home_team_wk_13_logo=wk['13'][
+                                                                                'home_url'],
+                                                                            away_team_wk_13_logo=wk['13'][
+                                                                                'away_url'],
+                                                                            score_wk_13=wk['13']['score'],
+                                                                            team_imgurl=self.franchise.bot.server_icon)
 
         hti.screenshot(html_str=html_string, css_file=r'team/html/TeamWeeklyStats.css',
                        save_as=f'{get_league_text(self.league)}weeklystats_{game_mode}.png')
@@ -521,8 +521,6 @@ class Team:
                     self.add_member(Member(_guild_member,
                                            self.league))
 
-
-
     async def build_quick_info_channel(self,
                                        sprocket_data: {}) -> None:
         """ Build quick info channel for this MLE team\n
@@ -625,6 +623,7 @@ class Team:
         """
         await self.build_quick_info_channel(self.sprocket_data)
 
+
 def get_league_text(league: LeagueEnum) -> str | None:
     """ Get text representation of League enumeration """
 
@@ -655,3 +654,32 @@ def get_league_text_short(league) -> str | None:
             return "AL"
         case LeagueEnum.Foundation_League:
             return "FL"
+
+
+def get_defined_team_players(_team: {},
+                             _sprocket_data: {}):
+    if not _sprocket_data or not _team:
+        return None
+    _all = [x for x in _sprocket_data['sprocket_players'] if x['franchise'] == _team['name']]
+    return {
+        'all': _all,
+        'fm': next((x for x in _all if x['Franchise Staff Position'] == 'Franchise Manager'), None),
+        'gms': [x for x in _all if x['Franchise Staff Position'] == 'General Manager'],
+        'agms': [x for x in _all if x['Franchise Staff Position'] == 'Assistant General Manager'],
+        'captains': [x for x in _all if x['Franchise Staff Position'] == 'Captain'],
+        'pr_supports': [x for x in _all if x['Franchise Staff Position'] == 'PR Support'],
+
+        'pl_players': [x for x in _all if x['skill_group'] == 'Premier League' and x['slot'] != 'NONE'],
+        'ml_players': [x for x in _all if x['skill_group'] == 'Master League' and x['slot'] != 'NONE'],
+        'cl_players': [x for x in _all if x['skill_group'] == 'Champion League' and x['slot'] != 'NONE'],
+        'al_players': [x for x in _all if x['skill_group'] == 'Academy League' and x['slot'] != 'NONE'],
+        'fl_players': [x for x in _all if x['skill_group'] == 'Foundation League' and x['slot'] != 'NONE'],
+    }
+
+
+def get_mle_franchise_embed(_team: {}) -> discord.Embed:
+    embed = (discord.Embed(color=discord.Color.from_str(_team['primary_color']),
+                           title=f"{_team['name']} Roster")
+             .set_footer(text=f"Generated: {datetime.datetime.now().strftime('%c')}"))
+    embed.set_thumbnail(url=_team['logo_img_link'])
+    return embed
