@@ -4,15 +4,9 @@
 # Purpose: General Functions of a League Member
 # Version 1.0.4
 """
-
-# local imports #
-# from MLEBot.enums import LeagueEnum
-from enums import LeagueEnum
-import roles
-
-# non-local imports #
+from .enums import LeagueEnum
+from . import roles
 import discord
-from discord.ext import commands
 
 
 class Member:
@@ -71,15 +65,15 @@ class Member:
             else returns None """
         for role in member.roles:
             if role.name == roles.PREMIER_LEAGUE:
-                return LeagueEnum.Premier_League
+                return LeagueEnum.PREMIER_LEAGUE
             if role.name == roles.MASTER_LEAGUE:
-                return LeagueEnum.Master_League
+                return LeagueEnum.MASTER_LEAGUE
             if role.name == roles.CHAMPION_LEAGUE:
-                return LeagueEnum.Champion_League
+                return LeagueEnum.CHAMPION_LEAGUE
             if role.name == roles.ACADEMY_LEAGUE:
                 return LeagueEnum.Academy_League
             if role.name == roles.FOUNDATION_LEAGUE:
-                return LeagueEnum.Foundation_League
+                return LeagueEnum.FOUNDATION_LEAGUE
 
     def __update_from_sprocket_players__(self,
                                          sprocket_players: {}) -> None:

@@ -2,22 +2,21 @@
 """ Minor League E-Sports Bot Commands
 # Author: irox_rl
 # Purpose: General Functions and Commands
-# Version 1.0.6
+# Version 1.0.7
 #
+# v1.0.6 - revival after some sprocket updates and life getting in the way...
 # v1.0.6 - Include slash commands
 """
 from PyDiscoBot import channels
 from PyDiscoBot import Pagination, InteractionPagination
 from PyDiscoBot import ReportableError
-
-# local imports #
-from enums import *
-import team
-from team import get_league_text
-from franchise import SALARY_CAP_PL, SALARY_CAP_ML, SALARY_CAP_CL, SALARY_CAP_AL, SALARY_CAP_FL
+from .embed_frames.salary_card import salary_card
+from .embed_frames.usage_card import usage_card
+from .enums import *
+from .team import get_league_text
+from .franchise import SALARY_CAP_PL, SALARY_CAP_ML, SALARY_CAP_CL, SALARY_CAP_AL, SALARY_CAP_FL
 
 # non-local imports #
-import difflib
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -30,85 +29,39 @@ class MLECommands(commands.Cog):
                  master_bot):
         self.bot = master_bot
 
+    @property
+    def sprocket(self):
+        return self.bot.sprocket
+
+    @property
+    def sprocket_data(self):
+        return self.bot.sprocket.data
+
     async def __local_lookup__(self,
                                interaction: discord.Interaction,
-                               mle_name: str = None):
-        data = self.bot.sprocket.data  # easier to write, shorter code
+                               name: str):
+        member = self.sprocket.get_member_from_name_str(name, try_match=True)
+        if not member:
+            return await self.bot.send_notification(interaction,
+                                                    f'mle member "{name}" not found in sprocket `Members` dataset')
+        player = self.sprocket.get_player_from_member(member)
+        if not player:
+            return await self.bot.send_notification(interaction,
+                                                    f'mle member "{name}" not found in sprocket `Players` dataset')
 
-        # Find player in Sprocket Members dataset
-        if mle_name:
-            _member = next((x for x in data['sprocket_members'] if x['name'] == mle_name), None)
-            if not _member:
-                matches = difflib.get_close_matches(mle_name, [x['name'] for x in data['sprocket_members']],
-                                                    1)
-                if matches:
-                    await self.bot.send_notification(interaction,
-                                                     f"Could not find `{mle_name}` in sprocket `Members` dataset. Did you mean `{matches[0]}`?")
-                    return
-        else:
-            _member = next(
-                (x for x in data['sprocket_members'] if x['discord_id'].__str__() == interaction.user.id.__str__()),
-                None)
-        if not _member:
-            await self.bot.send_notification(interaction,
-                                             'mle member not found in sprocket `Members` dataset')
-            return
+        franchise = self.sprocket.get_franchise_from_player(player)
+        player_tracker = self.sprocket.get_playerTracker_from_member(member)
 
-        # Find player in Sprocket Players dataset
-        _player = next((x for x in data['sprocket_players'] if x['member_id'] == _member['member_id']), None)
-        if not _player:
-            await self.bot.send_notification(interaction,
-                                             'mle member not found in sprocket `Players` dataset')
-            return
+        embed = salary_card(member,
+                            player,
+                            franchise,
+                            player_tracker)
 
-        # more data
-        _team = next((x for x in data['sprocket_teams'] if x['name'] == _player['franchise']), None)
-        tracker_player = next((x for x in data['sprocket_trackers'] if x['mleid'] == _member['mle_id']), None)
-
-        # embed
-        embed = (discord.Embed(
-            color=discord.Color.from_str(_team['primary_color']) if _team else self.bot.default_embed_color,
-            title=f"**{_member['name']} Sprocket Info**",
-            description='Data gathered by sprocket public data links.\n'
-                        'See more at [sprocket links](https://f004.backblazeb2.com/file/sprocket-artifacts/public/pages/index.html)\n')
-                 .set_footer(text=f'Generated: {self.bot.last_time}'))
-        embed.set_thumbnail(url=self.bot.mle_logo_url if not _team else _team['logo_img_link'])
-        embed.add_field(name='MLE Name', value=f"`{_member['name']}`", inline=True)
-        embed.add_field(name='MLE ID', value=f"`{_member['mle_id']}`", inline=True)
-        embed.add_field(name='Salary', value=f"`{_player['salary']}`", inline=True)
-        embed.add_field(name='League', value=f"`{_player['skill_group']}`", inline=True)
-        embed.add_field(name='Scrim Points', value=f"`{_player['current_scrim_points']}`", inline=True)
-        embed.add_field(name='Eligible?', value="`Yes`" if _player['current_scrim_points'] >= 30 else "`No`",
-                        inline=True)
-        embed.add_field(name='Franchise', value=f"`{_player['franchise']}`", inline=True)
-        embed.add_field(name='Staff Position', value=f"`{_player['Franchise Staff Position']}`", inline=True)
-        embed.add_field(name='Role', value=f"`{_player['slot']}`", inline=True)
-        if tracker_player:
-            embed.add_field(name='**Tracker Link**', value=tracker_player['tracker'], inline=False)
         await interaction.response.send_message(embed=embed)
-
-    async def __resolve_franchise__(self,
-                                    interaction: discord.Interaction):
-        _known_guild = next((x for x in self.bot.guild_ids if str(x['id']) == interaction.guild.id.__str__()), None)
-        if not _known_guild:
-            return None
-        return next(
-            (x for x in self.bot.sprocket.data['sprocket_teams'] if x['name'].upper() == _known_guild['team'].upper()),
-            None)
 
     @staticmethod
     def get_sprocket_player_team_info(sprocket_player) -> str | None:
         return f"`{sprocket_player['slot'].removeprefix('PLAYER')} | {sprocket_player['salary']} | {sprocket_player['name']}`"
-
-    def get_sprocket_usage_team_info(self,
-                                     sprocket_player) -> str | None:
-        role_usage = next((x for x in self.bot.sprocket.data['role_usages'] if
-                           (x['role'] == sprocket_player['slot']) and x['team_name'] == sprocket_player['franchise'] and
-                           x['league'].lower() in sprocket_player['skill_group'].lower()),
-                          None)
-        if not role_usage:
-            return None
-        return f"`{sprocket_player['slot'].removeprefix('PLAYER')} | 2s: {role_usage['doubles_uses']} | 3s: {role_usage['standard_uses']} | Total: {role_usage['total_uses']} | {sprocket_player['name']}`"
 
     @app_commands.command(name='clearchannel',
                           description='Clear channel messages. Include amt of messages to delete.\n Max is 100. (e.g. ub.clearchannel 55)')
@@ -162,12 +115,13 @@ class MLECommands(commands.Cog):
             app_commands.Choice(name='RFA', value='rfa'),
             app_commands.Choice(name='Waivers', value='waivers'),
             app_commands.Choice(name='Pend', value='pend')
-        ],
+    ],
         sorting=[
             app_commands.Choice(name='Salary', value='salary'),
-            app_commands.Choice(name='Scrim Points', value='current_scrim_points'),
+            app_commands.Choice(name='Scrim Points',
+                                value='current_scrim_points'),
             app_commands.Choice(name='Name', value='name')
-        ])
+    ])
     @app_commands.default_permissions()
     async def query(self,
                     interaction: discord.Interaction,
@@ -195,11 +149,11 @@ class MLECommands(commands.Cog):
         _players = sorted([x for x in data['sprocket_players'] if
                            x['franchise'].lower() == query_filter.lower() and x[
                                'skill_group'] == _league_enum.name.replace(
-                               '_', ' ')], key=lambda x: x[sorting])
+                               '_', ' ')], key=lambda x: x[sorting], reverse=True)
 
         if len(_players) == 0:
-            emb: discord.Embed = self.bot.default_embed(f'**Filtered Players**\n\n',
-                                                        f'There were no players to be found for this query!')
+            emb: discord.Embed = self.bot.default_embed('**Filtered Players**\n\n',
+                                                        'There were no players to be found for this query!')
             emb.set_thumbnail(url=self.bot.mle_logo_url)
             await interaction.followup.send(embed=emb)
             return
@@ -278,7 +232,8 @@ class MLECommands(commands.Cog):
                                              as_followup=True)
             return
 
-        _channel = next((x for x in interaction.guild.channels if x.id.__str__() == str(_channel_id)), None)
+        _channel = next(
+            (x for x in interaction.guild.channels if x.id.__str__() == str(_channel_id)), None)
         if not _channel:
             await self.bot.send_notification(interaction,
                                              'Roster channel has not been found! Run /regrosterchannel!',
@@ -296,11 +251,12 @@ class MLECommands(commands.Cog):
                                              as_followup=True)
 
     @app_commands.command(name='salary',
-                          description='Get salary and extra data about yourself from provided sprocket data.')
+                          description='Get salary and extra data about yourself from Sprocket.')
     @app_commands.default_permissions()
     async def salary(self,
                      interaction: discord.Interaction):
-        await self.__local_lookup__(interaction)
+        member = self.bot.sprocket.get_member_from_interaction(interaction)
+        await self.__local_lookup__(interaction, '' if member is None else member['name'])
 
     @commands.command(name='seasonstats',
                       description='Beta - Get season stats for a specific league.\n\tInclude league name. (e.g. ub.seasonstats master).\n\tNaming convention will be updated soon - Beta')
@@ -322,62 +278,46 @@ class MLECommands(commands.Cog):
     async def showusage(self,
                         interaction: discord.Interaction):
         await interaction.response.defer()
-        _team = await self.__resolve_franchise__(interaction)
-        if not _team:
-            await self.bot.send_notification(interaction,
-                                             'Could not resolve this franchise from sprocket data!',
-                                             as_followup=True)
-            return
+        franchise = self.bot.sprocket.get_franchise_from_interaction(
+            interaction)
+        if not franchise:
+            return await self.bot.send_notification(interaction,
+                                                    'Could not resolve this franchise from sprocket data!',
+                                                    as_followup=True)
 
-        _players = [x for x in self.bot.sprocket.data['sprocket_players'] if x['franchise'] == _team['name']]
-        if not _players:
-            await self.bot.send_notification(interaction,
-                                             'Could not get players for this franchise from sprocket!',
-                                             as_followup=True)
-            return
+        players = self.bot.sprocket.get_players_from_franchise(franchise,
+                                                               as_dict=True)
+        if not players:
+            return await self.bot.send_notification(interaction,
+                                                    'Could not get players for this franchise from sprocket!',
+                                                    as_followup=True)
 
-        _pl_players = [x for x in _players if x['skill_group'] == 'Premier League' and x['slot'] != 'NONE']
-        _ml_players = [x for x in _players if x['skill_group'] == 'Master League' and x['slot'] != 'NONE']
-        _cl_players = [x for x in _players if x['skill_group'] == 'Champion League' and x['slot'] != 'NONE']
-        _al_players = [x for x in _players if x['skill_group'] == 'Academy League' and x['slot'] != 'NONE']
-        _fl_players = [x for x in _players if x['skill_group'] == 'Foundation League' and x['slot'] != 'NONE']
+        complex_players = {
+            'players': players['players'],
+            'PL': [{
+                'player': x,
+                'usage': self.bot.sprocket.get_role_usage_from_player(x),
+            } for x in players['PL']] if players['PL'] else None,
+            'ML': [{
+                'player': x,
+                'usage': self.bot.sprocket.get_role_usage_from_player(x),
+            } for x in players['ML']] if players['ML'] else None,
+            'CL': [{
+                'player': x,
+                'usage': self.bot.sprocket.get_role_usage_from_player(x),
+            } for x in players['CL']] if players['CL'] else None,
+            'AL': [{
+                'player': x,
+                'usage': self.bot.sprocket.get_role_usage_from_player(x),
+            } for x in players['AL']] if players['AL'] else None,
+            'FL': [{
+                'player': x,
+                'usage': self.bot.sprocket.get_role_usage_from_player(x),
+            } for x in players['FL']] if players['FL'] else None,
+        }
 
-        embed = (discord.Embed(
-            color=discord.Color.from_str(_team['primary_color']),
-            title=f"**{_team['name']} Slot Usage Info**",
-            description='Data gathered by sprocket public data links.\n'
-                        'See more at [sprocket links](https://f004.backblazeb2.com/file/sprocket-artifacts/public/pages/index.html)\n')
-                 .set_footer(text=f'Generated: {self.bot.last_time}'))
-        embed.set_thumbnail(url=_team['logo_img_link'])
-
-        embed.add_field(name='**Season Slot Allowances**',
-                        value='`Doubles: 6 | Standard: 8 | Total: 12`   ',
-                        inline=False)
-
-        self.__show_usage_league__(sorted(_pl_players, key=lambda _p: _p['slot']),
-                                   embed,
-                                   'Premier',
-                                   SALARY_CAP_PL)
-
-        self.__show_usage_league__(sorted(_ml_players, key=lambda _p: _p['slot']),
-                                   embed,
-                                   'Master',
-                                   SALARY_CAP_ML)
-
-        self.__show_usage_league__(sorted(_cl_players, key=lambda _p: _p['slot']),
-                                   embed,
-                                   'Champion',
-                                   SALARY_CAP_CL)
-
-        self.__show_usage_league__(sorted(_al_players, key=lambda _p: _p['slot']),
-                                   embed,
-                                   'Academy',
-                                   SALARY_CAP_AL)
-
-        self.__show_usage_league__(sorted(_fl_players, key=lambda _p: _p['slot']),
-                                   embed,
-                                   'Foundation',
-                                   SALARY_CAP_FL)
+        embed = usage_card.usage_card(franchise,
+                                      complex_players)
 
         await interaction.followup.send(embed=embed)
 
@@ -406,14 +346,15 @@ class MLECommands(commands.Cog):
             return
         _league_text = get_league_text(_league_enum)
 
-        _team = await self.__resolve_franchise__(interaction)
-        if not _team:
-            await self.bot.send_notification(interaction,
-                                             'Could not resolve this franchise from sprocket data!',
-                                             as_followup=True)
-            return
+        franchise = self.bot.sprocket.get_franchise_from_interaction(
+            interaction)
+        if not franchise:
+            return await self.bot.send_notification(interaction,
+                                                    'Could not resolve this franchise from sprocket data!',
+                                                    as_followup=True)
 
-        _players = [x for x in self.bot.sprocket.data['sprocket_players'] if x['franchise'] == _team['name']]
+        _players = [x for x in self.bot.sprocket.data['sprocket_players']
+                    if x['franchise'] == franchise['Franchise']]
         if not _players:
             await self.bot.send_notification(interaction,
                                              'Could not get players for this franchise from sprocket!',
@@ -429,9 +370,9 @@ class MLECommands(commands.Cog):
 
         await interaction.response.defer()
         embed = self.bot.default_embed(
-            f"{_league_text} {_team['name']} Eligibility Information",
-            color=discord.Color.from_str(_team['primary_color']))
-        embed.set_thumbnail(url=_team['logo_img_link'])
+            f"{_league_text} {franchise['Franchise']} Eligibility Information",
+            color=discord.Color.from_str(franchise['Primary Color']))
+        embed.set_thumbnail(url=franchise['Photo URL'])
 
         ljust_limit = 8
 
@@ -440,7 +381,7 @@ class MLECommands(commands.Cog):
                             value=f"`{'Role:'.ljust(ljust_limit)}` {_p['slot']}\n"
                                   f"`{'Salary:'.ljust(ljust_limit)}` {_p['salary']}\n"
                                   f"`{'Points:'.ljust(ljust_limit)}` {_p['current_scrim_points'].__str__()}\n"
-                                  f"`{'Until:'.ljust(ljust_limit)}` ~TBD~",
+                                  f"`{'Until:'.ljust(ljust_limit)}` {_p['Eligible Until'].__str__()}",
                             inline=True)
 
         await interaction.followup.send(embed=embed)
@@ -454,12 +395,16 @@ class MLECommands(commands.Cog):
                        _team_name: str):
 
         if not _team_name:
-            raise ReportableError('You must provide a team when running this command!')
+            raise ReportableError(
+                'You must provide a team when running this command!')
 
-        _team = next((x for x in self.bot.sprocket.data['sprocket_teams'] if x['name'].lower() == _team_name.lower()),
-                     None)
+        _team = next(
+            (x for x in self.bot.sprocket.data['sprocket_teams'] if x['Franchise'].lower(
+            ) == _team_name.lower()),
+            None)
         if not _team:
-            raise ReportableError(f'Could not find team `{_team_name}` in sprocket data base!\nPlease try again!')
+            raise ReportableError(
+                f'Could not find team `{_team_name}` in sprocket data base!\nPlease try again!')
 
         embed = team.get_mle_franchise_embed(_team)
 
@@ -474,25 +419,30 @@ class MLECommands(commands.Cog):
                         inline=False)
 
         embed.add_field(name='**General Manager**',
-                        value=f"\n".join([f"`{gm['name']}`" for gm in _team_players['gms']]),
+                        value=f"\n".join(
+                            [f"`{gm['name']}`" for gm in _team_players['gms']]),
                         inline=False)
 
         if len(_team_players['agms']) != 0:
             embed.add_field(name='**Assistant General Managers**',
-                            value=f"\n".join([f"`{agm['name']}`" for agm in _team_players['agms']]),
+                            value=f"\n".join(
+                                [f"`{agm['name']}`" for agm in _team_players['agms']]),
                             inline=False)
 
         if len(_team_players['captains']) != 0:
             embed.add_field(name='**Captains**',
-                            value=f"\n".join([f"`{x['name']}`" for x in _team_players['captains']]),
+                            value=f"\n".join(
+                                [f"`{x['name']}`" for x in _team_players['captains']]),
                             inline=False)
 
         if len(_team_players['pr_supports']) != 0:
             embed.add_field(name='**PR Supports**',
-                            value=f"\n".join([f"`{x['name']}`" for x in _team_players['pr_supports']]),
+                            value=f"\n".join(
+                                [f"`{x['name']}`" for x in _team_players['pr_supports']]),
                             inline=False)
 
-        embed.add_field(name='**Roster**', value='**`[Top5/SalCap] [CanSign] League`**', inline=False)
+        embed.add_field(
+            name='**Roster**', value='**`[Top5/SalCap] [CanSign] League`**', inline=False)
 
         self.__team_info_league__(sorted(_team_players['pl_players'], key=lambda _p: _p['slot']),
                                   embed,
@@ -551,22 +501,6 @@ class MLECommands(commands.Cog):
             value=players_strings,
             inline=False)
 
-    def __show_usage_league__(self,
-                              players: [],
-                              embed: discord.Embed,
-                              league_name: str,
-                              salary_cap: float):
-        if not players:
-            return
-
-        players_strings = '\n'.join(
-            [self.get_sprocket_usage_team_info(player) for player in players if player is not None])
-
-        embed.add_field(
-            name=league_name,
-            value=players_strings,
-            inline=False)
-
 
 def get_players_salary_ceiling(top_sals: [{}]) -> float:
     sal_ceiling = 0.0
@@ -592,15 +526,15 @@ def get_league_enum_by_short_text(league: str):
     if not league:
         return None
     if league.lower() == 'pl':
-        _league_enum = LeagueEnum.Premier_League
+        _league_enum = LeagueEnum.PREMIER_LEAGUE
     elif league.lower() == 'ml':
-        _league_enum = LeagueEnum.Master_League
+        _league_enum = LeagueEnum.MASTER_LEAGUE
     elif league.lower() == 'cl':
-        _league_enum = LeagueEnum.Champion_League
+        _league_enum = LeagueEnum.CHAMPION_LEAGUE
     elif league.lower() == 'al':
         _league_enum = LeagueEnum.Academy_League
     elif league.lower() == 'fl':
-        _league_enum = LeagueEnum.Foundation_League
+        _league_enum = LeagueEnum.FOUNDATION_LEAGUE
     else:
         _league_enum = None
     return _league_enum

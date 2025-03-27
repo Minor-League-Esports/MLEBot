@@ -1,26 +1,20 @@
 """ Minor League E-Sports Bot
 # Author: irox_rl
 # Purpose: General Functions of a League Franchise summarized in bot fashion!
-# Version 1.1.0
+# Version 1.1.1
 #
+# v1.1.1 - linting my ass off oh my god
 # v1.0.6 - server integration
 """
-
-from PyDiscoBot import Bot
-from PyDiscoBot.commands import Commands
-
-# local imports #
-from lo_commands import LoCommands
-from mle_commands import MLECommands
-import roles
-from task_roster import Task_Roster
-from task_sprocket import Task_Sprocket
-
-# non-local imports #
+import os
 import discord
 from discord.ext import commands as disco_commands
-import dotenv
-import os
+from PyDiscoBot.bot import Bot
+from .lo_commands import LoCommands
+from .mle_commands import MLECommands
+from .roles import ALL_TEAMS
+from .task_roster import Task_Roster
+from .task_sprocket import Task_Sprocket
 
 
 class MLEBot(Bot):
@@ -32,7 +26,7 @@ class MLEBot(Bot):
                  command_cogs: [disco_commands.Cog]):
         super().__init__(command_prefix=command_prefix,
                          bot_intents=bot_intents,
-                         command_cogs=command_cogs)
+                         command_cogs=command_cogs) 
         self._sprocket = Task_Sprocket(self)
         self._roster = Task_Roster(self)
         self._guild_ids: [{}] = []
@@ -51,8 +45,7 @@ class MLEBot(Bot):
 
     async def build_guilds(self):
         self._guild_ids.clear()
-        dotenv.load_dotenv()
-        for team in roles.ALL_TEAMS:
+        for team in ALL_TEAMS:
             try:
                 _id = os.getenv(team).upper()
                 self._guild_ids.append({'team': team,
@@ -104,20 +97,3 @@ class MLEBot(Bot):
     async def on_task(self) -> None:
         await super().on_task()
         await self._sprocket.run()
-
-
-if __name__ == '__main__':
-    dotenv.load_dotenv()
-    intents = discord.Intents(8)
-    # noinspection PyDunderSlots
-    intents.guilds = True
-    # noinspection PyDunderSlots
-    intents.members = True
-    # noinspection PyDunderSlots
-    intents.message_content = True
-    # noinspection PyDunderSlots
-    intents.messages = True
-    bot = MLEBot(['ub.', 'Ub.', 'UB.'],
-                 intents,
-                 [Commands, MLECommands, LoCommands])
-    bot.run(os.getenv('DISCORD_TOKEN'))

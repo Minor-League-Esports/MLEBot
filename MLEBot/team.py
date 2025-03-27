@@ -8,8 +8,8 @@
 from PyDiscoBot import channels, err
 
 # local imports #
-from member import Member
-from enums import LeagueEnum
+from .member import Member
+from .enums import LeagueEnum
 
 # non-local imports #
 import os
@@ -628,15 +628,15 @@ def get_league_text(league: LeagueEnum) -> str | None:
     """ Get text representation of League enumeration """
 
     match league:
-        case LeagueEnum.Premier_League:
+        case LeagueEnum.PREMIER_LEAGUE:
             return "Premier League"
-        case LeagueEnum.Master_League:
+        case LeagueEnum.MASTER_LEAGUE:
             return "Master League"
-        case LeagueEnum.Champion_League:
+        case LeagueEnum.CHAMPION_LEAGUE:
             return "Champion League"
         case LeagueEnum.Academy_League:
             return "Academy League"
-        case LeagueEnum.Foundation_League:
+        case LeagueEnum.FOUNDATION_LEAGUE:
             return "Foundation League"
 
 
@@ -644,15 +644,15 @@ def get_league_text_short(league) -> str | None:
     """ Get shorthand string representation of League enumeration """
 
     match league:
-        case LeagueEnum.Premier_League:
+        case LeagueEnum.PREMIER_LEAGUE:
             return "PL"
-        case LeagueEnum.Master_League:
+        case LeagueEnum.MASTER_LEAGUE:
             return "ML"
-        case LeagueEnum.Champion_League:
+        case LeagueEnum.CHAMPION_LEAGUE:
             return "CL"
         case LeagueEnum.Academy_League:
             return "AL"
-        case LeagueEnum.Foundation_League:
+        case LeagueEnum.FOUNDATION_LEAGUE:
             return "FL"
 
 
@@ -660,7 +660,7 @@ def get_defined_team_players(_team: {},
                              _sprocket_data: {}):
     if not _sprocket_data or not _team:
         return None
-    _all = [x for x in _sprocket_data['sprocket_players'] if x['franchise'] == _team['name']]
+    _all = [x for x in _sprocket_data['sprocket_players'] if x['franchise'] == _team['Franchise']]
     return {
         'all': _all,
         'fm': next((x for x in _all if x['Franchise Staff Position'] == 'Franchise Manager'), None),
@@ -678,8 +678,8 @@ def get_defined_team_players(_team: {},
 
 
 def get_mle_franchise_embed(_team: {}) -> discord.Embed:
-    embed = (discord.Embed(color=discord.Color.from_str(_team['primary_color']),
-                           title=f"{_team['name']} Roster")
+    embed = (discord.Embed(color=discord.Color.from_str(_team['Primary Color']),
+                           title=f"{_team['Franchise']} Roster")
              .set_footer(text=f"Generated: {datetime.datetime.now().strftime('%c')}"))
-    embed.set_thumbnail(url=_team['logo_img_link'])
+    embed.set_thumbnail(url=_team['Photo URL'])
     return embed

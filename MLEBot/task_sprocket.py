@@ -8,10 +8,12 @@
 from PyDiscoBot import err
 
 # local imports #
-from sprocket_data_link import SprocketDataLink
+from .sprocket_data_link import SprocketDataLink
 
 # non-local imports #
 import datetime
+import difflib
+import discord
 import pickle
 
 
@@ -140,6 +142,66 @@ class Task_Sprocket:
                                                                        minutes=(0 - self._last_time_ran.minute),
                                                                        seconds=(0 - self._last_time_ran.second), days=1)
         return
+
+    def get_franchise_from_interaction(self,
+                                       interaction: discord.Interaction):
+        known_guild = next((x for x in self.bot.guild_ids if str(x['id']) == interaction.guild.id.__str__()), None)
+        if not known_guild:
+            return None
+        return next((x for x in self.data['sprocket_teams'] if x['Franchise'].upper() == known_guild['team'].upper()),
+                    None)
+
+    def get_franchise_from_player(self,
+                                  player: {}):
+        return next((x for x in self.data['sprocket_teams'] if x['Franchise'] == player['franchise']), None)
+
+    def get_member_from_interaction(self,
+                                    interaction: discord.Interaction):
+        return next((x for x in self.data['sprocket_members'] if x['discord_id'] == str(interaction.user.id.__str__())),
+                    None)
+
+    def get_member_from_name_str(self,
+                                 name: str,
+                                 try_match: bool = False):
+        member = next((x for x in self.data['sprocket_members'] if x['name'].lower() == name.lower()), None)
+        if not member and try_match:
+            matches = difflib.get_close_matches(name,
+                                                [x['name'] for x in self.data['sprocket_members']],
+                                                1)
+            if matches:
+                member = next((x for x in self.data['sprocket_members'] if x['name'].lower() == matches[0].lower()),
+                              None)
+        return member
+
+    def get_player_from_member(self,
+                               member: {}):
+        return next((x for x in self.data['sprocket_players'] if x['member_id'] == member['member_id']), None)
+
+    def get_playerTracker_from_member(self,
+                                      member: {}):
+        return next((x for x in self.data['sprocket_trackers'] if x['mleid'] == member['mle_id']), None)
+
+    def get_players_from_franchise(self,
+                                   franchise: {},
+                                   as_dict: bool = False):
+        players = [x for x in self.data['sprocket_players'] if x['franchise'] == franchise['Franchise']]
+        if not as_dict:
+            return players
+        return {
+            'players': players,
+            'PL': [x for x in players if x['skill_group'] == 'Premier League' and x['slot'] != 'NONE'],
+            'ML': [x for x in players if x['skill_group'] == 'Master League' and x['slot'] != 'NONE'],
+            'CL': [x for x in players if x['skill_group'] == 'Champion League' and x['slot'] != 'NONE'],
+            'AL': [x for x in players if x['skill_group'] == 'Academy League' and x['slot'] != 'NONE'],
+            'FL': [x for x in players if x['skill_group'] == 'Foundation League' and x['slot'] != 'NONE'],
+        }
+
+    def get_role_usage_from_player(self,
+                                   player: {}):
+        return next((x for x in self.data['role_usages'] if
+                     x['role'] == player['slot']
+                     and x['team_name'] == player['franchise']
+                     and x['league'].lower() in player['skill_group'].lower()), None)
 
     def load(self):
         try:

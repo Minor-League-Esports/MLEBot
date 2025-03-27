@@ -6,7 +6,7 @@
 """
 
 # local imports #
-from enums import LeagueEnum
+from .enums import LeagueEnum
 
 # non-local imports #
 import copy
@@ -247,15 +247,15 @@ def get_role_by_name(guild: discord.Guild, name: str) -> discord.Role | None:
 
 def get_role_by_league(self, league: LeagueEnum):
     match league:
-        case LeagueEnum.Premier_League:
+        case LeagueEnum.PREMIER_LEAGUE:
             return self.premier
-        case LeagueEnum.Master_League:
+        case LeagueEnum.MASTER_LEAGUE:
             return self.master
-        case LeagueEnum.Champion_League:
+        case LeagueEnum.CHAMPION_LEAGUE:
             return self.champion
         case LeagueEnum.Academy_League:
             return self.academy
-        case LeagueEnum.Foundation_League:
+        case LeagueEnum.FOUNDATION_LEAGUE:
             return self.foundation
 
 

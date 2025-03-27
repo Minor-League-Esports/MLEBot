@@ -6,18 +6,7 @@
 """
 
 from PyDiscoBot import channels, err
-
-# local imports #
-from member import get_members_by_role
-import roles
-
-# non-local imports #
-import datetime
 import discord
-from discord.ext import commands
-import os
-import pickle
-from typing import Callable
 
 IMG_STAFF = None
 IMG_PREMIER = None

@@ -2,20 +2,20 @@
 """ Minor League E-Sports Enumerations
 # Author: irox_rl
 # Purpose: Host MLE related enumerations to be used throughout this project
-# Version 1.0.2
+# Version 1.0.3
+#
+# Changelog:
+# 1.0.3 - linting my ass off - enums to UPPER_CASE
 """
 
-# local imports #
-
-# non-local imports #
 from enum import Enum
 
 
 class LeagueEnum(Enum):
     """ MLE League Enumeration Class
     """
-    Premier_League = 1
-    Master_League = 2
-    Champion_League = 3
-    Academy_League = 4
-    Foundation_League = 5
+    PREMIER_LEAGUE = 1
+    MASTER_LEAGUE = 2
+    CHAMPION_LEAGUE = 3
+    ACADEMY_LEAGUE = 4
+    FOUNDATION_LEAGUE = 5
