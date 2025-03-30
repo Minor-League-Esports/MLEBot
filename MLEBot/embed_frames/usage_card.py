@@ -1,66 +1,65 @@
-#!/usr/bin/env python
-""" Minor League E-Sports Rocket League Player Salary Card
-# Author: irox_rl
-# Purpose: Salary Card embed function for ease of access / cleanliness
-# Version 1.0.7
-#
-# v1.0.7 - init
-"""
-import datetime
-import discord
+from pydiscobot import EmbedField
+from .card import mle_card
+from ..types import Franchise, PlayerRL
 
 
-def usage_card(franchise: {},
-               players: {}):
-    embed = (discord.Embed(
-        color=discord.Color.from_str(franchise['Primary Color']),
-        title=f"**{franchise['Franchise']} Slot Usage Info**",
-        description='Data gathered by sprocket public data links.\n'
-                    'See more at [sprocket links](https://f004.backblazeb2.com/file/sprocket-artifacts/public/pages/index.html)\n')
-             .set_footer(text=f'Generated: {datetime.datetime.now()}'))
-    embed.set_thumbnail(url=franchise['Photo URL'])
+def usage_card(franchise: Franchise):
+    """Minor League E-Sports Rocket League
+    Usage Card
 
-    embed.add_field(name='**Season Slot Allowances**',
-                    value='`Doubles: 6 | Standard: 8 | Total: 12`   ',
-                    inline=False)
+    Args:
+        franchise (dict): sprocket franchise
+        players (dict): sprocket players dictionary
 
-    if players['PL']:
-        embed.add_field(
+    Returns:
+        discord.Embed: team usage card
+    """
+    title = f"**{franchise.franchise_meta['Franchise']} Slot Usage Info**"
+    descr = 'Data gathered by sprocket public data links.\n'
+    descr += 'See more at [sprocket links](https://f004.backblazeb2.com/file/sprocket-artifacts/public/pages/index.html)\n'
+
+    fields = [
+        EmbedField('**Season Slot Allowances**',
+                   '`Doubles: 6 | Standard: 8 | Total: 12`   ')
+    ]
+
+    if franchise.players_rl.pl:
+        fields.append(EmbedField(
             name='Premier',
-            value='\n'.join([__player_usage_string__(x)
-                            for x in players['PL']]),
-            inline=False)
+            value='\n'.join([_player_usage_string(x)
+                            for x in franchise.players_rl.pl])))
 
-    if players['ML']:
-        embed.add_field(
+    if franchise.players_rl.ml:
+        fields.append(EmbedField(
             name='Master',
-            value='\n'.join([__player_usage_string__(x)
-                            for x in players['ML']]),
-            inline=False)
+            value='\n'.join([_player_usage_string(x)
+                            for x in franchise.players_rl.ml])))
 
-    if players['CL']:
-        embed.add_field(
+    if franchise.players_rl.cl:
+        fields.append(EmbedField(
             name='Champion',
-            value='\n'.join([__player_usage_string__(x)
-                            for x in players['CL']]),
-            inline=False)
+            value='\n'.join([_player_usage_string(x)
+                            for x in franchise.players_rl.cl])))
 
-    if players['AL']:
-        embed.add_field(
+    if franchise.players_rl.al:
+        fields.append(EmbedField(
             name='Academy',
-            value='\n'.join([__player_usage_string__(x)
-                            for x in players['AL']]),
-            inline=False)
+            value='\n'.join([_player_usage_string(x)
+                            for x in franchise.players_rl.al])))
 
-    if players['FL']:
-        embed.add_field(
+    if franchise.players_rl.fl:
+        fields.append(EmbedField(
             name='Foundation',
-            value='\n'.join([__player_usage_string__(x)
-                            for x in players['FL']]),
-            inline=False)
+            value='\n'.join([_player_usage_string(x)
+                            for x in franchise.players_rl.fl])))
 
-    return embed
+    return mle_card(title, descr, franchise.franchise_meta, fields)
 
 
-def __player_usage_string__(player):
-    return f"`{player['player']['slot'].removeprefix('PLAYER')} | 2s: {player['usage']['doubles_uses']} | 3s: {player['usage']['standard_uses']} | Total: {player['usage']['total_uses']} | {player['player']['name']}`"
+def _player_usage_string(player: PlayerRL):
+    slot = player.player['slot'].removeprefix('PLAYER')
+    dbl_use = player.usage['doubles_uses']
+    std_use = player.usage['standard_uses']
+    ttl_use = player.usage['total_uses']
+    name = player.player['name']
+    return f"`{slot} 2s: {dbl_use} | 3s: {std_use} | All: {ttl_use} | {name}`"

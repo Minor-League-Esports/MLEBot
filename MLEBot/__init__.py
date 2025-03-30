@@ -1,11 +1,7 @@
-from .mle_bot import MLEBot
-from .mle_commands import MLECommands
-from .lo_commands import LoCommands
+from .mlebot import MLEBot
 
 __version__ = "1.1.0"
 
 __all__ = (
     "MLEBot",
-    "MLECommands",
-    "LoCommands",
 )
