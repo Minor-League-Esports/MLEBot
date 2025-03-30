@@ -29,11 +29,10 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
 ]
 dependencies = [
-    "PyDiscoBot>=1.0.4",
+    "PyDiscoBot>=1.1.1",
     "discord.py",
     "python-dotenv",
     "requests",
-    "html2image"
 ]
 
 license = {file = "LICENSE"}
