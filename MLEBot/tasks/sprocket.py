@@ -61,52 +61,31 @@ class Sprocket:
 
     def _calc_next_fetch_time(self) -> None:
         self.logger.info('calculating next run time...')
-        def _calc(last_time_ran: datetime.datetime,
-                  hour_to_compare: int) -> datetime.datetime | None:
 
-            now = datetime.datetime.now()
+        def _generate(n: datetime.datetime,
+                      hour: int):
+            return n + (
+                datetime.timedelta(days=0,
+                                   hours=hour-n.hour,
+                                   minutes=15-n.minute,
+                                   seconds=0-n.second,
+                                   microseconds=0-n.microsecond))
 
-            # if we never ran.... well, run i guess?
-            if not last_time_ran:
-                self.logger.info('must update now...')
-                return now
+        now = datetime.datetime.now()
+        if now.hour < 6:
+            self._next_run_time = _generate(now, 6)
 
-            # if it's a new day, run it
-            if last_time_ran.day != now.day:
-                self.logger.info('must update now...')
-                return now
+        elif now.hour < 12:
+            self._next_run_time = _generate(now, 12)
 
-            # if we've ran already at this point today, return None
-            if last_time_ran.hour >= hour_to_compare:
-                return None
+        elif now.hour < 18:
+            self._next_run_time = _generate(now, 18)
 
-            # if we've passed the hour to compare and haven't updated, update now
-            if hour_to_compare <= now.hour:
-                self.logger.info('must update now...')
-                return now
+        else:
+            self._next_run_time = _generate(now, 24)
 
-            # calculate the time till the next update time
-            if last_time_ran.hour < hour_to_compare:
-                update_time = (now + datetime.timedelta(hours=hour_to_compare - now.hour,
-                                                        minutes=0 - now.minute,
-                                                        seconds=0 - now.second))
-                self.logger.info('set to update @ %s...', str(update_time))
-                return update_time
-
-        x = _calc(self._last_time_ran, 6)
-        if x:
-            self._next_run_time = x
-            return
-
-        x = _calc(self._last_time_ran, 12)
-        if x:
-            self._next_run_time = x
-            return
-
-        x = _calc(self._last_time_ran, 18)
-        if x:
-            self._next_run_time = x
-            return
+        self.logger.info('next run time -> %s',
+                         self._next_run_time.strftime("%m/%d/%Y, %H:%M:%S"))
 
     async def _update(self):
         threads = [threading.Thread(name='fetch', target=link.fetch)
