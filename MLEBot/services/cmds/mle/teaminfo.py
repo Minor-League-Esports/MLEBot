@@ -24,8 +24,9 @@ class TeamInfo(Cmd):
         franchise: Franchise = lookup_franchise(self._parent.sprocket.links,
                                                 name=team_name)
         if not franchise:
-            return await self._parent.send_notification(interaction,
-                                                        ERR_BAD_FRANCHISE,
-                                                        as_followup=True)
+            await self._parent.send_notification(interaction,
+                                                 ERR_BAD_FRANCHISE,
+                                                 as_followup=True)
+            return
 
         await interaction.followup.send(embed=teaminfo_card(franchise))

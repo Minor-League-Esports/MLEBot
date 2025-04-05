@@ -38,9 +38,10 @@ class TeamEligibility(Cmd):
         franchise: Franchise = lookup_franchise(self._parent.sprocket.links,
                                                 discord_id=interaction.user.id)
         if not franchise:
-            return await self._parent.send_notification(interaction,
-                                                        const.ERR_BAD_FRANCHISE,
-                                                        as_followup=True)
+            await self._parent.send_notification(interaction,
+                                                 const.ERR_BAD_FRANCHISE,
+                                                 as_followup=True)
+            return
 
         await interaction.followup.send(embed=teameligibility_card(franchise,
                                                                    league.value))

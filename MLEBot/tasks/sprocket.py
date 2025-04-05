@@ -40,8 +40,7 @@ class Sprocket(Task):
         Returns:
             tuple[SprocketLinks]: sprocket data links
         """
-        items = self._links.links()
-        return items
+        return self._links.links()
 
     @property
     def ready_to_update(self) -> bool:
@@ -102,6 +101,7 @@ class Sprocket(Task):
             thread.join()
 
         self._last_time_ran = datetime.datetime.now()
+        self._links.compile_data()
 
     def load(self):
         """load run times from artifacts file
@@ -135,6 +135,7 @@ class Sprocket(Task):
             return
         for link in self.iterlinks:
             link.init()
+        self._links.compile_data()
         self.load()
 
     async def run(self):

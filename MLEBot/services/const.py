@@ -25,6 +25,20 @@ SPR_DL_MAT_GRP = "https://f004.backblazeb2.com/file/sprocket-artifacts/public/da
 SPR_DL_TRACKER = "https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/trackers.json"
 SPR_DL_USAGE = "https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/role_usages.json"
 
+# HK - Hash-Key
+# If None: No unique id to identify
+SPR_HK_MEMBERS = "discord_id"
+SPR_HK_MEMBERS_SECONDARY = "name"
+SPR_HK_PLAYERS = "member_id"
+SPR_HK_PLA_STATS = "member_id"
+SPR_HK_TEAMS = "Franchise"
+SPR_HK_SCRIMS = None
+SPR_HK_FIXT = 'fixture_id'
+SPR_HK_MATCHES = 'match_id'
+SPR_HK_MAT_GRP = 'match_group_id'
+SPR_HK_TRACKER = "mleid"
+SPR_HK_USAGE = None
+
 # SG - Skill Group
 SPR_SG_PL = 'Premier League'
 SPR_SG_ML = 'Master League'

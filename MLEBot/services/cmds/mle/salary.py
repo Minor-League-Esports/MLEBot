@@ -23,8 +23,8 @@ class Salary(Cmd):
         member: Member = lookup_rl(self._parent.sprocket.links,
                                    discord_id=interaction.user.id)
         if not member:
-            self._parent.send_notification(interaction,
-                                           ERR_BAD_NAME,
-                                           as_reply=True)
+            await self._parent.send_notification(interaction,
+                                                 ERR_BAD_NAME,
+                                                 as_reply=True)
             return
         await interaction.response.send_message(embed=salary_card(member))
