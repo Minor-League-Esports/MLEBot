@@ -1,6 +1,9 @@
+"""Lookup player by MLE name.
+    """
+
 import discord
 from discord import app_commands
-from pydiscobot.services.cmds._cmd import Cmd
+from pydiscobot.types import Cmd
 from ....embed_frames import salary_card
 from ....services.const import ERR_BAD_NAME
 from ...sprocket.lookup import lookup_rl
@@ -17,7 +20,7 @@ class Lookup(Cmd):
     @app_commands.default_permissions()
     async def lookup(self,
                      interaction: discord.Interaction,
-                     mle_name: str):
+                     mle_name: str) -> None:
         'Lookup player by MLE name provided.'
         member: Member = lookup_rl(self._parent.sprocket.links,
                                    name=mle_name)

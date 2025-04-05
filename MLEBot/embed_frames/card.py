@@ -1,3 +1,8 @@
+"""general card for MLE
+    this card contains franchise and color information
+    it should be used for all interaction
+    """
+
 import os
 import discord
 from pydiscobot import frame, EmbedField
@@ -6,7 +11,7 @@ from pydiscobot import frame, EmbedField
 def mle_card(title: str,
              descr: str | None = None,
              franchise: dict | None = None,
-             fields: list[EmbedField] | None = []) -> discord.Embed:
+             fields: list[EmbedField] | None = None) -> discord.Embed:
     """get generic Minor League E-Sports Embed 'card' for consistent formatting.
 
     Args:
@@ -17,6 +22,9 @@ def mle_card(title: str,
     Returns:
         discord.Embed: generic MLE formatted embed
     """
+    if not fields:
+        fields = []
+
     color_str = os.getenv('MLE_COLOR') if not franchise else\
         franchise['Primary Color']
 

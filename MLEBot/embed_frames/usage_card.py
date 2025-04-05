@@ -1,6 +1,7 @@
 from pydiscobot import EmbedField
 from .card import mle_card
 from ..types import Franchise, PlayerRL
+from ..services import const
 
 
 def usage_card(franchise: Franchise):
@@ -14,13 +15,12 @@ def usage_card(franchise: Franchise):
     Returns:
         discord.Embed: team usage card
     """
-    title = f"**{franchise.franchise_meta['Franchise']} Slot Usage Info**"
-    descr = 'Data gathered by sprocket public data links.\n'
-    descr += 'See more at [sprocket links](https://f004.backblazeb2.com/file/sprocket-artifacts/public/pages/index.html)\n'
+    title = f"**{franchise.name} Slot Usage Info**"
+    descr = const.SPR_INFO
 
     fields = [
         EmbedField('**Season Slot Allowances**',
-                   '`Doubles: 6 | Standard: 8 | Total: 12`   ')
+                   f'`Dbl: {const.SLOT_USAGE_DBL} | Std: {const.SLOT_USAGE_STD} | Ttl: {const.SLOT_USAGE_TTL}`')
     ]
 
     if franchise.players_rl.pl:
@@ -57,9 +57,9 @@ def usage_card(franchise: Franchise):
 
 
 def _player_usage_string(player: PlayerRL):
-    slot = player.player['slot'].removeprefix('PLAYER')
-    dbl_use = player.usage['doubles_uses']
-    std_use = player.usage['standard_uses']
-    ttl_use = player.usage['total_uses']
-    name = player.player['name']
+    slot = player.slot.removeprefix('PLAYER')
+    dbl_use = player.usage_doubles
+    std_use = player.usage_standard
+    ttl_use = player.usage_total
+    name = player.name
     return f"`{slot} 2s: {dbl_use} | 3s: {std_use} | All: {ttl_use} | {name}`"

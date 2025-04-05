@@ -1,3 +1,6 @@
+""" MLE League Enumeration Class
+    """
+
 from enum import Enum
 
 

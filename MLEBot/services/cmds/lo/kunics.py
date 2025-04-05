@@ -1,6 +1,9 @@
+"""PIVOT
+    """
+
 import discord
 from discord import app_commands
-from pydiscobot.services.cmds._cmd import Cmd
+from pydiscobot.types import Cmd
 
 
 class Kunics(Cmd):
@@ -12,6 +15,8 @@ class Kunics(Cmd):
     @app_commands.default_permissions()
     async def kunics(self,
                      interaction: discord.Interaction):
+        """PIVOT
+        """
         await interaction.response.send_message("""***P I V O T
 I V O T
 V O T

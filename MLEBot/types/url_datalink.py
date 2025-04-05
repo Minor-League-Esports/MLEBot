@@ -1,3 +1,6 @@
+"""url data link to grab json data from remote server and store it
+    """
+
 import datetime
 import json
 import requests
@@ -13,7 +16,8 @@ class UrlDataLink:
                  name: str,
                  url_link: str):
         self.logger = logger(__name__+name)
-        self.logger.info('initializing link -> %s | url -> %s...', name, url_link)
+        self.logger.info(
+            'initializing link -> %s | url -> %s...', name, url_link)
         self._time: datetime.datetime | None = None
         self._data = None
         self._name = name

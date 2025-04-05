@@ -1,6 +1,9 @@
+"""Rebuild bot meta data.
+"""
+
 import discord
 from discord import app_commands
-from pydiscobot.services.cmds._cmd import Cmd
+from pydiscobot.types import Cmd
 
 
 class Rebuild(Cmd):
@@ -12,7 +15,7 @@ class Rebuild(Cmd):
     @app_commands.guilds(1043295434828947547)
     @app_commands.default_permissions()
     async def rebuild(self,
-                      interaction: discord.Interaction):
+                      interaction: discord.Interaction) -> None:
         """Rebuild bot meta data."""
         await interaction.response.defer()
         if await self._parent.rebuild():

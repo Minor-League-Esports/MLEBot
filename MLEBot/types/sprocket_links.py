@@ -1,3 +1,6 @@
+"""sprocket data links
+    """
+
 from ..services import const
 from ..types.url_datalink import UrlDataLink
 

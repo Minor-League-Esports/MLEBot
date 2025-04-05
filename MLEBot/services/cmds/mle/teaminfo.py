@@ -1,6 +1,6 @@
 import discord
 from discord import app_commands
-from pydiscobot.services.cmds._cmd import Cmd
+from pydiscobot.types import Cmd
 from ....embed_frames import teaminfo_card
 from ...sprocket import lookup_franchise
 from ....types import Franchise

@@ -1,6 +1,9 @@
+"""provide methods to distribute sprocket data, such as players or franchises
+    """
+
 import difflib
 from ...services import const
-from ...types import Member, SprocketLinks, PlayerRL, Franchise, TeamRocketLeague, TeamTrackmania
+from ...types import Member, SprocketLinks, PlayerRL, Franchise, TeamRocketLeague, TeamTrackmania, MLEFranchiseTeam
 
 
 def lookup_franchise(sprocket_data: SprocketLinks,
@@ -37,44 +40,49 @@ def lookup_franchise(sprocket_data: SprocketLinks,
             == franchise['Franchise']]
 
     pl = [PlayerRL(x,
-                   next((y for y in sprocket_data.trackers.data if y['mleid'] == x['member_id']), None),
+                   next(
+                       (y for y in sprocket_data.trackers.data if y['mleid'] == x['member_id']), None),
                    next((y for y in sprocket_data.usages.data if y['role'] == x['slot']), None))
           for x in p_rl if x['skill_group'] == const.SPR_SG_PL and x['slot'] != 'NONE']
 
     ml = [PlayerRL(x,
-                   next((y for y in sprocket_data.trackers.data if y['mleid'] == x['member_id']), None),
+                   next(
+                       (y for y in sprocket_data.trackers.data if y['mleid'] == x['member_id']), None),
                    next((y for y in sprocket_data.usages.data if y['role'] == x['slot']), None))
           for x in p_rl if x['skill_group'] == const.SPR_SG_ML and x['slot'] != 'NONE']
 
     cl = [PlayerRL(x,
-                   next((y for y in sprocket_data.trackers.data if y['mleid'] == x['member_id']), None),
+                   next(
+                       (y for y in sprocket_data.trackers.data if y['mleid'] == x['member_id']), None),
                    next((y for y in sprocket_data.usages.data if y['role'] == x['slot']), None))
           for x in p_rl if x['skill_group'] == const.SPR_SG_CL and x['slot'] != 'NONE']
 
     al = [PlayerRL(x,
-                   next((y for y in sprocket_data.trackers.data if y['mleid'] == x['member_id']), None),
+                   next(
+                       (y for y in sprocket_data.trackers.data if y['mleid'] == x['member_id']), None),
                    next((y for y in sprocket_data.usages.data if y['role'] == x['slot']), None))
           for x in p_rl if x['skill_group'] == const.SPR_SG_AL and x['slot'] != 'NONE']
 
     fl = [PlayerRL(x,
-                   next((y for y in sprocket_data.trackers.data if y['mleid'] == x['member_id']), None),
+                   next(
+                       (y for y in sprocket_data.trackers.data if y['mleid'] == x['member_id']), None),
                    next((y for y in sprocket_data.usages.data if y['role'] == x['slot']), None))
           for x in p_rl if x['skill_group'] == const.SPR_SG_FL and x['slot'] != 'NONE']
 
     rl_team = TeamRocketLeague(
-        pl=pl,
-        ml=ml,
-        cl=cl,
-        al=al,
-        fl=fl,
+        pl=MLEFranchiseTeam(pl),
+        ml=MLEFranchiseTeam(ml),
+        cl=MLEFranchiseTeam(cl),
+        al=MLEFranchiseTeam(al),
+        fl=MLEFranchiseTeam(fl),
     )
 
     # gather tm data
     p_tm = []
 
     tm_team = TeamTrackmania(
-        cl=[],
-        al=[]
+        cl=MLEFranchiseTeam([]),
+        al=MLEFranchiseTeam([])
     )
 
     # compile
@@ -84,9 +92,11 @@ def lookup_franchise(sprocket_data: SprocketLinks,
         players_rl_meta=p_rl,
         players_tm_meta=p_tm,
         franchise_meta=franchise,
-        fm=next((x for x in p_rl if x['Franchise Staff Position'] == 'Franchise Manager'), None),
+        fm=next(
+            (x for x in p_rl if x['Franchise Staff Position'] == 'Franchise Manager'), None),
         gms=[x for x in p_rl if x['Franchise Staff Position'] == 'General Manager'],
-        agms=[x for x in p_rl if x['Franchise Staff Position'] == 'Assistant General Manager'],
+        agms=[x for x in p_rl if x['Franchise Staff Position']
+              == 'Assistant General Manager'],
         captains=[x for x in p_rl if x['Franchise Staff Position'] == 'Captain'],
         pr=[x for x in p_rl if x['Franchise Staff Position'] == 'PR Support'],
     )

@@ -1,6 +1,9 @@
+"""Update info from sprocket.
+    """
+
 import discord
 from discord import app_commands
-from pydiscobot.services.cmds._cmd import Cmd
+from pydiscobot.types import Cmd
 
 
 class UpdateSprocket(Cmd):
@@ -11,7 +14,7 @@ class UpdateSprocket(Cmd):
                           description='Update info from sprocket.')
     @app_commands.default_permissions()
     async def updatesprocket(self,
-                             interaction: discord.Interaction):
+                             interaction: discord.Interaction) -> None:
         await interaction.response.defer()
         self._parent.sprocket.reset()
         await self._parent.sprocket.run()

@@ -1,5 +1,8 @@
+"""Minor League E-Sports Types (Classes)
+    """
+
 from .enums import LeagueEnum
-from .franchise import Franchise, TeamRocketLeague, TeamTrackmania
+from .franchise import Franchise, TeamRocketLeague, TeamTrackmania, MLEFranchiseTeam
 from .member import Member
 from .player import PlayerRL
 from .sprocket_links import SprocketLinks
@@ -12,6 +15,7 @@ __all__ = (
     'TeamRocketLeague',
     'TeamTrackmania',
     'Member',
+    'MLEFranchiseTeam',
     'PlayerRL',
     'LeagueEnum',
     'SprocketLinks',

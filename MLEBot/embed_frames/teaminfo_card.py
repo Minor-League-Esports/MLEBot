@@ -1,3 +1,7 @@
+"""Minor League E-Sports Rocket League
+    Team Info Card
+    """
+
 from pydiscobot import EmbedField
 from .card import mle_card
 from ..types import Franchise, PlayerRL
@@ -14,9 +18,8 @@ def teaminfo_card(franchise: Franchise):
     Returns:
         discord.Embed: team info card
     """
-    title = f"{franchise.franchise_meta['Franchise']} Roster"
-    descr = 'Data gathered by sprocket public data links.\n'
-    descr += 'See more at [sprocket links](https://f004.backblazeb2.com/file/sprocket-artifacts/public/pages/index.html)\n'
+    title = f"{franchise.name} Roster"
+    descr = const.SPR_INFO
 
     fields = [
         EmbedField('**Franchise Manager**',
@@ -75,19 +78,19 @@ def teaminfo_card(franchise: Franchise):
     fields.append(EmbedField('**Roster**',
                              '**`[Top5/SalCap] [CanSign] League`**'))
 
-    pl = _team_info(sorted(franchise.players_rl.pl, key=lambda _p: _p.player['slot']),
+    pl = _team_info(franchise.players_rl.pl.slot_sorted_players(),
                     const.SPR_SG_PL,
                     const.SALARY_CAP_PL)
-    ml = _team_info(sorted(franchise.players_rl.ml, key=lambda _p: _p.player['slot']),
+    ml = _team_info(franchise.players_rl.ml.slot_sorted_players(),
                     const.SPR_SG_ML,
                     const.SALARY_CAP_ML)
-    cl = _team_info(sorted(franchise.players_rl.cl, key=lambda _p: _p.player['slot']),
+    cl = _team_info(franchise.players_rl.cl.slot_sorted_players(),
                     const.SPR_SG_CL,
                     const.SALARY_CAP_CL)
-    al = _team_info(sorted(franchise.players_rl.al, key=lambda _p: _p.player['slot']),
+    al = _team_info(franchise.players_rl.al.slot_sorted_players(),
                     const.SPR_SG_AL,
                     const.SALARY_CAP_AL)
-    fl = _team_info(sorted(franchise.players_rl.fl, key=lambda _p: _p.player['slot']),
+    fl = _team_info(franchise.players_rl.fl.slot_sorted_players(),
                     const.SPR_SG_FL,
                     const.SALARY_CAP_FL)
     if pl:

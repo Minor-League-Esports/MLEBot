@@ -1,6 +1,9 @@
+"""Show team eligibility.
+    """
+
 import discord
 from discord import app_commands
-from pydiscobot.services.cmds._cmd import Cmd
+from pydiscobot.types import Cmd
 from ....embed_frames import teameligibility_card
 from ....types import Franchise
 from ...sprocket import lookup_franchise
@@ -24,7 +27,7 @@ class TeamEligibility(Cmd):
     @app_commands.default_permissions()
     async def teameligibility(self,
                               interaction: discord.Interaction,
-                              league: app_commands.Choice[str]):
+                              league: app_commands.Choice[str]) -> None:
         """get team eligibility
 
         Args:

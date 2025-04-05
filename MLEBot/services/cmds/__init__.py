@@ -1,3 +1,6 @@
+"""Minor League E-Sports Bot Commands
+    """
+
 from .lo import Commands as lo_commands
 from .mle import Commands as mle_commands
 from .rl import Commands as rl_commands

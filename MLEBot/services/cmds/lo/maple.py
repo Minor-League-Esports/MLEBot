@@ -1,6 +1,9 @@
+"""Oh, Canada...
+    """
+
 import discord
 from discord import app_commands
-from pydiscobot.services.cmds._cmd import Cmd
+from pydiscobot.types import Cmd
 
 
 class Maple(Cmd):
@@ -12,4 +15,6 @@ class Maple(Cmd):
     @app_commands.default_permissions()
     async def maple(self,
                     interaction: discord.Interaction):
+        """Oh, Canada...
+        """
         await interaction.response.send_message(':flag_ca: Sorry. :flag_ca:')

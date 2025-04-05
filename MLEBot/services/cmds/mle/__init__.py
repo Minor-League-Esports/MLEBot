@@ -1,3 +1,6 @@
+"""Minor League E-Sports Bot Commands
+    """
+
 from .lookup import Lookup
 from .query import Query
 from .rebuild import Rebuild

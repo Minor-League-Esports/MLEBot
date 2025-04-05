@@ -1,5 +1,10 @@
+"""salary card
+    display player league information
+    """
+
 from pydiscobot import EmbedField
 from .card import mle_card
+from ..services.const import SPR_INFO
 from ..types import Member
 
 
@@ -16,33 +21,29 @@ def salary_card(member: Member):
     Returns:
         discord.Embed: salary card for specified player
     """
-    p = member.rl_player.player
-    m = member.member
+    player = member.rl_player
     tracker = member.rl_player.tracker
-    franchise = member.franchise
 
-    title = f"**{m['name']} Sprocket Info**"
+    title = f"**{member.name} Sprocket Info**"
 
-    descr = 'Data gathered by sprocket public data links.\n'
-    descr += 'See more at [sprocket links](https://f004.backblazeb2.com/file/sprocket-artifacts/public/pages/index.html)\n'
-
-    eligible = "`Yes`" if p['current_scrim_points'] >= 30 else "`No`"
+    descr = SPR_INFO
 
     fields = [
-        EmbedField('MLE Name', f"`{m['name']}`", True),
-        EmbedField('MLE ID', f"`{m['mle_id']}`", True),
-        EmbedField('Salary', f"`{p['salary']}`", True),
-        EmbedField('League', f"`{p['skill_group']}`", True),
-        EmbedField('Scrim Pts', f"`{p['current_scrim_points']}`", True),
-        EmbedField('Eligible?', eligible, True),
-        EmbedField('Franchise', f"`{p['franchise']}`", True),
-        EmbedField('Staff?', f"`{p['Franchise Staff Position']}`", True),
-        EmbedField('Role', f"`{p['slot']}`", True),
+        EmbedField('MLE Name', f"`{member.name}`", True),
+        EmbedField('MLE ID', f"`{member.mle_id}`", True),
+        EmbedField('Salary', f"`{player.salary}`", True),
+        EmbedField('League', f"`{player.skill_group}`", True),
+        EmbedField('Scrim Pts', f"`{player.scrim_points}`", True),
+        EmbedField('Eligible?', "`Yes`" if player.eligible else "`No`", True),
+        EmbedField('Franchise', f"`{player.franchise}`", True),
+        EmbedField('Staff?', f"`{player.staff_position}`", True),
+        EmbedField('Role', f"`{player.slot}`", True),
     ]
 
     if tracker:
-        fields.append(EmbedField('**Tracker Link**', tracker['tracker']))
+        fields.append(EmbedField('**Tracker Link**',
+                      member.rl_player.tracker['tracker']))
 
-    embed = mle_card(title, descr, franchise, fields)
+    embed = mle_card(title, descr, member.franchise, fields)
 
     return embed

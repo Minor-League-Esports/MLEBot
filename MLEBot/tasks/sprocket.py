@@ -1,16 +1,18 @@
+"""Manage Sprocket data links for up-to-date information
+    """
+
 import datetime
 import json
 import threading
-from pydiscobot.services.log import logger
+from pydiscobot.types import Task
 from ..types import SprocketLinks, UrlDataLink
 
 
-class Sprocket:
+class Sprocket(Task):
     """sprocket bot task"""
 
     def __init__(self, parent):
-        self.parent = parent
-        self.logger = logger(__name__)
+        super().__init__(parent)
 
         self._links = SprocketLinks()
         self._loaded = False
@@ -19,6 +21,8 @@ class Sprocket:
 
         self._last_time_ran: datetime.datetime | None = None
         self._next_run_time: datetime.datetime | None = None
+
+        self.init()
 
     @property
     def links(self) -> SprocketLinks:
@@ -136,7 +140,6 @@ class Sprocket:
     async def run(self):
         """run this sprocket task
         """
-        self.logger.info('running task...')
         if not self._loaded:
             self.init()
         if self.ready_to_update:

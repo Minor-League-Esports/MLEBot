@@ -1,3 +1,7 @@
+"""in honor of some folks who helped make MLE what it is,
+    we have immortalized them with these commands.
+    """
+
 from .achilles import Achilles
 from .adi import Adi
 from .bw import Bw

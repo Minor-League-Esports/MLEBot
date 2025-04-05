@@ -1,3 +1,6 @@
+"""MLE Bot Logical Services
+    """
+
 from . import const
 from .cmds import Commands
 from .sprocket import lookup_franchise, lookup_rl

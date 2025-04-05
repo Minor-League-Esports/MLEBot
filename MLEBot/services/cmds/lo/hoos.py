@@ -1,6 +1,9 @@
+""":kissing_heart:
+    """
+
 import discord
 from discord import app_commands
-from pydiscobot.services.cmds._cmd import Cmd
+from pydiscobot.types import Cmd
 
 
 class Hoos(Cmd):
@@ -12,5 +15,7 @@ class Hoos(Cmd):
     @app_commands.default_permissions()
     async def hoos(self,
                    interaction: discord.Interaction):
+        """:kissing_heart:
+        """
         await interaction.response.send_message(
             'Friends share more DNA than strangers.')

@@ -1,6 +1,9 @@
+"""KD
+    """
+
 import discord
 from discord import app_commands
-from pydiscobot.services.cmds._cmd import Cmd
+from pydiscobot.types import Cmd
 
 
 class Kd(Cmd):
@@ -12,4 +15,6 @@ class Kd(Cmd):
     @app_commands.default_permissions()
     async def kd(self,
                  interaction: discord.Interaction):
+        """KD
+        """
         await interaction.response.send_message('` `')

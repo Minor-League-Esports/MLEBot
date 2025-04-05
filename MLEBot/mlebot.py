@@ -1,3 +1,6 @@
+"""Minor League E-Sports PyDiscoBot implimentation
+    """
+
 import os
 import discord
 from discord.ext import commands as disco_commands
@@ -23,6 +26,7 @@ class MLEBot(Bot):
                          bot_intents=bot_intents,
                          command_cogs=command_cogs)
         self._sprocket = Sprocket(self)
+        self._tasker.append(self._sprocket)
         self._guild_ids: list[dict] = []
 
     @property
@@ -69,16 +73,9 @@ class MLEBot(Bot):
         Args:
             suppress_task (bool, optional): don't run periodic task. Defaults to False.
         """
-        self.logger.info('MLEBot on_ready...')
         if self._admin_info.initialized:
             self.logger.warning('already initialized!')
             return
         await super().on_ready(suppress_task)
         await self._build_guilds()
-        self._sprocket.init()
         await self.change_presence(activity=self.activity)
-
-    async def on_task(self) -> None:
-        self.logger.info('MLEBot running on_task...')
-        await super().on_task()
-        await self._sprocket.run()

@@ -1,6 +1,9 @@
+"""Brick by boring brick.
+    """
+
 import discord
 from discord import app_commands
-from pydiscobot.services.cmds._cmd import Cmd
+from pydiscobot.types import Cmd
 
 
 class Adi(Cmd):
@@ -12,5 +15,7 @@ class Adi(Cmd):
     @app_commands.default_permissions()
     async def adi(self,
                   interaction: discord.Interaction):
+        """Brick by boring brick.
+        """
         _bricks = [':brick:'] * 20
         await interaction.response.send_message(' '.join(_bricks))

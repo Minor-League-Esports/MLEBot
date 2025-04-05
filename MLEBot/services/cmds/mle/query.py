@@ -1,7 +1,10 @@
+"""Lookup groups of players by provided filter.
+    """
+
 import discord
 from discord import app_commands
 from pydiscobot import InteractionPagination
-from pydiscobot.services.cmds._cmd import Cmd
+from pydiscobot.types import Cmd
 from ....embed_frames import mle_card
 from ....services import const
 
@@ -39,7 +42,7 @@ class Query(Cmd):
                     interaction: discord.Interaction,
                     league_filter: app_commands.Choice[str],
                     query_filter: str,
-                    sorting: str):
+                    sorting: str) -> None:
         """query sprocket db with filters
 
         Args:
@@ -47,9 +50,6 @@ class Query(Cmd):
             league_filter (app_commands.Choice[str]): which league?
             query_filter (str): which player pool?
             sorting (str): sorting type?
-
-        Returns:
-            your: mom
         """
         _players = sorted([x for x in self._parent.sprocket.links.players.data if x['franchise'].lower(
         ) == query_filter.lower() and x['skill_group'] == league_filter.value], key=lambda x: x[sorting], reverse=True)

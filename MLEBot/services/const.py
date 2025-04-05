@@ -1,3 +1,6 @@
+"""Minor League E-Sports Constants
+    """
+
 URL_REQ_TIMEOUT = 30.0
 
 # ERR - Error
@@ -5,6 +8,11 @@ ERR_BAD_NAME = 'The name provided could not be found in our database.\nIf this i
 ERR_BAD_FRANCHISE = 'Could not resolve this franchise from sprocket data!'
 
 # SPR - Sprocket
+SPR_INFO = '\n'.join([
+    'Data gathered by sprocket public data links.',
+    'See more at [sprocket links](https://f004.backblazeb2.com/file/sprocket-artifacts/public/pages/index.html)'
+])
+
 # DL - Datalink
 SPR_DL_MEMBERS = "https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/members.json"
 SPR_DL_PLAYERS = "https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/players.json"
@@ -37,6 +45,10 @@ SALARY_CAP_ML = 82.0
 SALARY_CAP_CL = 69.5
 SALARY_CAP_AL = 57.5
 SALARY_CAP_FL = 39.5
+
+SLOT_USAGE_STD = 8
+SLOT_USAGE_DBL = 6
+SLOT_USAGE_TTL = 12
 
 AVIATORS = "Aviators"
 BEARS = "Bears"
