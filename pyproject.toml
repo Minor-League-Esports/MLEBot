@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "MLEBot"
-version = "1.1.0"
+version = "1.1.2"
 authors = [
   { name="Brian LaFond", email="Brian.L.LaFond@gmail.com" },
 ]
@@ -29,11 +29,10 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
 ]
 dependencies = [
-    "PyDiscoBot>=1.0.4",
+    "PyDiscoBot>=1.1.1",
     "discord.py",
     "python-dotenv",
     "requests",
-    "html2image"
 ]
 
 license = {file = "LICENSE"}
