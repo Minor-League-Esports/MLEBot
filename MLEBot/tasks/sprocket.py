@@ -1,10 +1,17 @@
 """Manage Sprocket data links for up-to-date information
     """
+from __future__ import annotations
+
 
 import datetime
 import json
 import threading
-from pydiscobot.types import Task
+
+
+from pydiscobot import Task
+from pydiscobot.types.err import BotNotLoaded
+
+
 from ..types import SprocketLinks, UrlDataLink
 
 
@@ -16,6 +23,7 @@ class Sprocket(Task):
 
         self._links = SprocketLinks()
         self._loaded = False
+        self._updating = False
 
         self.on_updated: list[callable] = []
 
@@ -31,6 +39,8 @@ class Sprocket(Task):
         Returns:
             SprocketLinks: dataclass of sprocket url datalinks
         """
+        if self.updating:
+            raise BotNotLoaded('Sprocket links are updating!')
         return self._links
 
     @property
@@ -40,7 +50,7 @@ class Sprocket(Task):
         Returns:
             tuple[SprocketLinks]: sprocket data links
         """
-        return self._links.links()
+        return self.links.links()
 
     @property
     def ready_to_update(self) -> bool:
@@ -61,6 +71,15 @@ class Sprocket(Task):
             str: string of url appended with .json
         """
         return '.' + self.__class__.__name__ + '.json'
+
+    @property
+    def updating(self) -> bool:
+        """links are currently fetching data
+
+        Returns:
+            bool: updating
+        """
+        return self._updating
 
     def _calc_next_fetch_time(self) -> None:
         self.logger.info('calculating next run time...')
@@ -94,14 +113,30 @@ class Sprocket(Task):
         threads = [threading.Thread(name='fetch', target=link.fetch)
                    for link in self.iterlinks]
 
-        for thread in threads:
-            thread.start()
+        self._updating = True
+        # any calls to our 'links' attr here
+        # will raise an exception
 
-        for thread in threads:
-            thread.join()
+        for t in threads:
+            t.start()
+
+        for t in threads:
+            t.join()
 
         self._last_time_ran = datetime.datetime.now()
+
         self._links.compile_data()
+
+        self._calc_next_fetch_time()
+
+        self.save()
+
+        self._updating = False
+
+        for callback in self.on_updated:
+            await callback()
+
+        await self.parent.notify('sprocket server links updated.')
 
     def load(self):
         """load run times from artifacts file
@@ -146,13 +181,6 @@ class Sprocket(Task):
         if self.ready_to_update:
             self.logger.info('updating links...')
             await self._update()
-        else:
-            return
-        self._calc_next_fetch_time()
-        self.save()
-        for callback in self.on_updated:
-            await callback()
-        await self.parent.notify('sprocket server links updated.')
 
     def save(self):
         """save run time data to artifacts file

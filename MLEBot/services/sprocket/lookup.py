@@ -1,8 +1,11 @@
 """provide methods to distribute sprocket data, such as players or franchises
     """
+from __future__ import annotations
+
 
 import difflib
-from ...services import const
+
+from ... import const
 from ...types import Member, SprocketLinks, PlayerRL, Franchise
 
 

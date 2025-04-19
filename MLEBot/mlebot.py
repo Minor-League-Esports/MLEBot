@@ -1,12 +1,17 @@
 """Minor League E-Sports PyDiscoBot implimentation
     """
+from __future__ import annotations
 
 import os
 import discord
 from discord.ext import commands as disco_commands
+
+
 from pydiscobot import Bot
-from .services.cmds import Commands
-from .services import const
+
+
+from .commands import Commands
+from . import const
 from .tasks.sprocket import Sprocket
 
 
@@ -31,7 +36,8 @@ class MLEBot(Bot):
 
     @property
     def activity(self) -> discord.Activity:
-        return discord.Activity(type=discord.ActivityType.listening, name='hot farts being generated in the atmosphere by alien lizard men.')
+        return discord.Activity(type=discord.ActivityType.listening,
+                                name='hot farts being generated in the atmosphere by alien lizard men.')
 
     @property
     def guild_ids(self) -> list[dict]:
@@ -73,9 +79,12 @@ class MLEBot(Bot):
         Args:
             suppress_task (bool, optional): don't run periodic task. Defaults to False.
         """
-        if self._admin_info.initialized:
+        if self.status.initialized:
             self.logger.warning('already initialized!')
             return
         await super().on_ready(suppress_task)
         await self._build_guilds()
-        await self.change_presence(activity=self.activity)
+
+        if self.ws:  # if we are connected to a web-socket
+            # otherwise, this will raise...
+            await self.change_presence(activity=self.activity)

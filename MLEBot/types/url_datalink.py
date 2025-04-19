@@ -1,11 +1,18 @@
 """url data link to grab json data from remote server and store it
     """
+from __future__ import annotations
+
 
 import json
+from logging import Logger
 from typing import Any
 import requests
-from pydiscobot.services.log import logger
-from ..services.const import URL_REQ_TIMEOUT
+
+
+from pydiscobot import log
+
+
+URL_REQ_TIMEOUT = 30.0
 
 
 class UrlDataLink:
@@ -19,7 +26,6 @@ class UrlDataLink:
                  url_link: str,
                  hash_key: str | None = None,
                  second_hash_key: str | None = None):
-        self.logger = logger(__name__+name)
         self._data = None
         self._hash_data = None
         self._secondary_hash_data = None
@@ -28,6 +34,7 @@ class UrlDataLink:
         self._hash_key = hash_key
         self._secondary_hash_key = second_hash_key
         self._initialized: bool = False
+        self._logger = log.logger(self._name)
 
     @property
     def data(self) -> any:
@@ -56,6 +63,10 @@ class UrlDataLink:
             str: string of url appended with .json
         """
         return '.' + self._name + '.json'
+
+    @property
+    def logger(self) -> Logger:
+        return self._logger
 
     def _clear(self) -> None:
         self._data = None
